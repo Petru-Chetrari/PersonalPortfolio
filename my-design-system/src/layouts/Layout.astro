@@ -1,0 +1,22 @@
+---
+import Header from '../components/Header.svelte';
+import Footer from '../components/Footer.svelte';
+import '../styles/global.css';
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>Astro</title>
+	</head>
+	<body class="bg-slate-900 text-slate-50 min-h-screen flex flex-col items-center">
+		<Header client:load />
+		<main class="flex-1 flex flex-col gap-[10px] items-center pt-[100px] pb-[120.8px] w-full max-w-[1144px] relative px-[24px]">
+			<slot />
+		</main>
+		<Footer client:load />
+	</body>
+</html>

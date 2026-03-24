@@ -1,0 +1,48 @@
+---
+import Layout from './Layout.astro';
+import AdminNav from '../components/AdminNav.svelte';
+import '../styles/global.css';
+
+const imgIcon3 = "http://localhost:3845/assets/5c0e52a784517cf9364c0a316fa429c49d141322.svg";
+---
+
+<Layout>
+  <!-- Full width container mimicking the AdminDashboard frame -->
+  <div class="flex flex-col gap-[24px] items-start p-[32px] w-full max-w-[1144px]">
+    
+    <!-- Header row: Info & Navigation -->
+    <div class="flex items-end justify-between w-full flex-wrap gap-4 lg:gap-0 lg:h-[68px]">
+      
+      <!-- Descriptions -->
+      <div class="flex flex-col gap-[8px] items-start flex-1 min-w-[300px]">
+        <h1 class="font-['Segoe_UI',sans-serif] font-bold text-[30px] leading-[36px] tracking-[-0.75px] text-slate-50 m-0">
+          Admin Portal
+        </h1>
+        <p class="font-['Segoe_UI_Emoji',sans-serif] text-[16px] leading-[24px] text-slate-400 m-0">
+          Manage all your commissions, projects, and review requests.
+        </p>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center gap-[16px] h-fit md:h-[45.6px]">
+        <!-- Top bar navigation -->
+        <AdminNav client:load />
+
+        <!-- Settings Button -->
+        <button class="bg-slate-800 border-slate-700 border-[0.8px] border-solid rounded-[10px] h-[37.6px] px-[16px] flex items-center justify-center gap-2 hover:bg-slate-700 transition-colors shadow-sm">
+          <img src={imgIcon3} alt="Settings" class="w-4 h-4" />
+          <span class="font-['Segoe_UI',sans-serif] text-[14px] leading-[20px] text-slate-300">Settings</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Content slot — ProjectManager renders directly into this card -->
+    <div
+      class="border-solid rounded-[24px] shadow-xl w-full overflow-hidden"
+      style="background-color: #151B28; border: 1px solid #1E293B; min-height: 600px;"
+    >
+      <slot />
+    </div>
+
+  </div>
+</Layout>

@@ -1,0 +1,11 @@
+---
+import AdminDashboard from '../../layouts/AdminDashboard.astro';
+import ProjectManager from '../../components/ProjectManager.svelte';
+---
+
+<AdminDashboard>
+  <!-- Full height container within the slot -->
+  <div class="w-full h-full min-h-[500px]">
+    <ProjectManager client:load />
+  </div>
+</AdminDashboard>
