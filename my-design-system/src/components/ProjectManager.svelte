@@ -1,4 +1,5 @@
-<script>
+<script lang="ts">
+  import { validateProject, type ValidationErrors } from '../lib/validation';
   const imgImageAuraAnalyticsDashboard =
     "http://localhost:3845/assets/bee0d7335ba9c7d1cb6f76e9c25452666693add1.png";
 
@@ -13,7 +14,6 @@
       longDesc:
         "The Aura Analytics Dashboard was conceived from the need to visualize complex datasets in real-time without compromising on performance or user experience. The primary challenge was handling high-frequency data streams while maintaining a smooth, 60fps interface.\n\nWe implemented a custom data aggregation layer that batches updates, combined with highly optimized React components using memoization techniques. The result is a dashboard that can process thousands of data points per second while remaining completely responsive. The design language focuses on high contrast and clarity, using a dark theme to reduce eye strain for users who monitor these dashboards for hours at a time.",
       photo: imgImageAuraAnalyticsDashboard,
-      category: "Web Application",
       tags: ["React", "TypeScript", "Tailwind", "Recharts", "WebSocket"],
     },
     {
@@ -25,7 +25,6 @@
       longDesc:
         "Lumina Mobile Banking solves complex user flows with simplified micro-interactions and high-contrast, easy-to-read financial overviews. Accessibility was a core principle from day one, ensuring every feature met WCAG AA standards.",
       photo: imgImageAuraAnalyticsDashboard,
-      category: "Mobile Application",
       tags: ["Figma", "UI/UX", "Prototyping"],
     },
     {
@@ -37,7 +36,6 @@
       longDesc:
         "Nova provides a robust set of accessible components designed for dense data layouts typical in SaaS platforms. Built with composability in mind, each component is self-contained and themeable.",
       photo: imgImageAuraAnalyticsDashboard,
-      category: "Design System",
       tags: ["React", "Storybook", "Accessibility"],
     },
   ]);
@@ -57,17 +55,17 @@
 
   // ─── Helpers ───────────────────────────────────────────────────
   function validate() {
-    errors.title = !editedProject.title.trim();
-    errors.shortDesc = !editedProject.shortDesc.trim();
-    errors.longDesc = !(editedProject.longDesc?.trim());
-    errors.appType = !(editedProject.appType?.trim());
-    return (
-      !errors.title && !errors.shortDesc && !errors.appType //&& !errors.longDesc
-    );
+    const { isValid, errors: validationErrors } = validateProject(editedProject);
+    errors = {
+      title: validationErrors.title,
+      shortDesc: validationErrors.shortDesc,
+      appType: validationErrors.appType,
+    };
+    return isValid;
   }
 
   // Clear field error as user types
-  function clearError(field) {
+  function clearError(field: keyof ValidationErrors) {
     errors[field] = false;
   }
 
@@ -76,7 +74,7 @@
     if (selectedProject) {
       isEditing = false;
       isAddingNew = false;
-      errors = { title: false, shortDesc: false };
+      errors = { title: false, shortDesc: false, appType: false };
       editedProject = { ...selectedProject };
       editedTagsString = selectedProject.tags.join(", ");
     }
@@ -86,7 +84,7 @@
   function startEdit() {
     editedProject = { ...selectedProject };
     editedTagsString = selectedProject.tags.join(", ");
-    errors = { title: false, shortDesc: false };
+    errors = { title: false, shortDesc: false, appType: false };
     isAddingNew = false;
     isEditing = true;
   }
@@ -99,6 +97,7 @@
       shortDesc: "",
       longDesc: "",
       photo: imgImageAuraAnalyticsDashboard,
+      tags: [],
     };
     editedTagsString = "";
     errors = { title: false, shortDesc: false, appType: false };
