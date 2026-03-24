@@ -2,7 +2,8 @@
   const imgImageAuraAnalyticsDashboard =
     "http://localhost:3845/assets/bee0d7335ba9c7d1cb6f76e9c25452666693add1.png";
 
-  const projects = [
+  // ─── Project Data ──────────────────────────────────────────────
+  const projects = $state([
     {
       id: 1,
       title: "Aura Analytics Dashboard",
@@ -39,25 +40,116 @@
       category: "Design System",
       tags: ["React", "Storybook", "Accessibility"],
     },
-  ];
+  ]);
 
+  // ─── Selection ─────────────────────────────────────────────────
   let selectedProject = $state(projects[0]);
+
+  // ─── Edit / Add State ──────────────────────────────────────────
+  let isEditing = $state(false);
+  let isAddingNew = $state(false);
+
+  let editedProject = $state({ ...projects[0] });
+  let editedTagsString = $state(projects[0].tags.join(", "));
+
+  // Validation errors — keyed by field name
+  let errors = $state({ title: false, shortDesc: false, appType: false });
+
+  // ─── Helpers ───────────────────────────────────────────────────
+  function validate() {
+    errors.title = !editedProject.title.trim();
+    errors.shortDesc = !editedProject.shortDesc.trim();
+    errors.longDesc = !(editedProject.longDesc?.trim());
+    errors.appType = !(editedProject.appType?.trim());
+    return (
+      !errors.title && !errors.shortDesc && !errors.appType //&& !errors.longDesc
+    );
+  }
+
+  // Clear field error as user types
+  function clearError(field) {
+    errors[field] = false;
+  }
+
+  // ─── Project-switch effect ─────────────────────────────────────
+  $effect(() => {
+    if (selectedProject) {
+      isEditing = false;
+      isAddingNew = false;
+      errors = { title: false, shortDesc: false };
+      editedProject = { ...selectedProject };
+      editedTagsString = selectedProject.tags.join(", ");
+    }
+  });
+
+  // ─── Actions ───────────────────────────────────────────────────
+  function startEdit() {
+    editedProject = { ...selectedProject };
+    editedTagsString = selectedProject.tags.join(", ");
+    errors = { title: false, shortDesc: false };
+    isAddingNew = false;
+    isEditing = true;
+  }
+
+  function startAddNew() {
+    editedProject = {
+      id: Date.now(),
+      title: "",
+      appType: "",
+      shortDesc: "",
+      longDesc: "",
+      photo: imgImageAuraAnalyticsDashboard,
+    };
+    editedTagsString = "";
+    errors = { title: false, shortDesc: false, appType: false };
+    isAddingNew = true;
+    isEditing = true;
+  }
+
+  function saveEdit() {
+    if (!validate()) return; // Guard: stop if invalid
+
+    const parsedTags = editedTagsString
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
+
+    if (isAddingNew) {
+      // Push new project to the top of the list
+      const newProject = { ...editedProject, tags: parsedTags };
+      projects.unshift(newProject);
+      selectedProject = projects[0];
+    } else {
+      // Update existing
+      const idx = projects.findIndex((p) => p.id === selectedProject.id);
+      if (idx !== -1) {
+        projects[idx] = { ...editedProject, tags: parsedTags };
+        selectedProject = projects[idx];
+      }
+    }
+
+    isEditing = false;
+    isAddingNew = false;
+  }
+
+  function cancelEdit() {
+    isEditing = false;
+    isAddingNew = false;
+    errors = { title: false, shortDesc: false, appType: false };
+  }
+
+  function deleteProject() {
+    const idx = projects.findIndex((p) => p.id === selectedProject.id);
+    if (idx !== -1) {
+      projects.splice(idx, 1);
+      selectedProject = projects[0] ?? null;
+    }
+  }
 </script>
 
 <!--
-  LAYOUT:
-  This component renders directly into AdminDashboard.astro's slot,
-  which already provides the outer dark card (bg-slate-800, rounded-[24px]).
-  
-  Inner structure: flex row — [Sidebar 260px] | [Detail Panel flex-1]
-  
-  Colors (from target design):
-    Sidebar bg: transparent (inherits outer card)
-    Active item bg: #1E293B (slightly lighter card)
-    Right panel bg: #0F172A (darker than outer card)
-    Blue labels: #3B82F6
-    Body text: #CBD5E1 (slate-300)
-    Divider: #334155 (slate-700)
+  LAYOUT: flex row — [Sidebar 260px] | [Detail Panel flex-1]
+  Renders directly into AdminDashboard.astro slot (outer card already provided).
 -->
 
 <div
@@ -65,7 +157,7 @@
   style="border: 1px solid #1E293B; border-radius: 24px; min-height: 700px; padding: 17px; gap: 20px;"
 >
   <!-- ══════════════════════════════════════════
-       SIDEBAR — fixed 260px, scrollable
+       SIDEBAR
   ══════════════════════════════════════════ -->
   <aside
     class="shrink-0 flex flex-col overflow-y-auto sidebar-scroll"
@@ -82,6 +174,7 @@
         Portfolio Projects
       </span>
       <button
+        onclick={startAddNew}
         style="background: #2563EB; color: white; font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 9999px; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px; white-space: nowrap;"
         onmouseenter={(e) => (e.currentTarget.style.background = "#1D4ED8")}
         onmouseleave={(e) => (e.currentTarget.style.background = "#2563EB")}
@@ -125,14 +218,14 @@
   </aside>
 
   <!-- ══════════════════════════════════════════
-       DETAIL PANEL — flex-1, darker bg
+       DETAIL PANEL
   ══════════════════════════════════════════ -->
   <main
     class="flex-1 flex flex-col overflow-y-auto detail-scroll min-w-0"
     style="border: 1px solid #1E293B; background-color: #0F172A; border-radius: 24px;"
   >
     {#if selectedProject}
-      <!-- Panel header: "Project Details" + Edit/Delete -->
+      <!-- ── Panel Header ──────────────────────────────── -->
       <div
         class="flex items-center justify-between px-8 py-5 shrink-0"
         style="border-bottom: 1px solid #334155; background: rgba(30,41,59,0.2);"
@@ -140,183 +233,374 @@
         <h2
           style="color: #F8FAFC; font-size: 18px; font-weight: 700; margin: 0;"
         >
-          Project Details
+          {isAddingNew
+            ? "New Project"
+            : isEditing
+              ? "Edit Project"
+              : "Project Details"}
         </h2>
+
         <div style="display: flex; gap: 10px; align-items: center;">
-          <!-- Edit button -->
-          <button
-            style="display: flex; align-items: center; gap: 6px; background: #334155; color: #F8FAFC; font-size: 12px; font-weight: 700; padding: 7px 14px; border-radius: 8px; border: none; cursor: pointer;"
-            onmouseenter={(e) => (e.currentTarget.style.background = "#475569")}
-            onmouseleave={(e) => (e.currentTarget.style.background = "#334155")}
-          >
-            <svg
-              width="13"
-              height="13"
-              viewBox="0 0 20 20"
-              fill="none"
-              style="flex-shrink:0"
+          {#if isEditing}
+            <!-- Save button -->
+            <button
+              onclick={saveEdit}
+              style="display: flex; align-items: center; gap: 6px; background: #2563EB; color: #F8FAFC; font-size: 12px; font-weight: 700; padding: 7px 16px; border-radius: 8px; border: none; cursor: pointer;"
+              onmouseenter={(e) =>
+                (e.currentTarget.style.background = "#1D4ED8")}
+              onmouseleave={(e) =>
+                (e.currentTarget.style.background = "#2563EB")}
             >
-              <path
-                d="M14.7 2.29a1 1 0 0 1 1.41 0l1.6 1.6a1 1 0 0 1 0 1.42L5.46 17.56 2 18l.44-3.46L14.7 2.29Z"
-                stroke="#F8FAFC"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-            Edit
-          </button>
-          <!-- Delete button -->
-          <button
-            style="display: flex; align-items: center; gap: 6px; background: rgba(255,32,86,0.1); color: #FF2056; font-size: 12px; font-weight: 700; padding: 7px 14px; border-radius: 8px; border: 1px solid rgba(255,32,86,0.3); cursor: pointer;"
-            onmouseenter={(e) =>
-              (e.currentTarget.style.background = "rgba(255,32,86,0.2)")}
-            onmouseleave={(e) =>
-              (e.currentTarget.style.background = "rgba(255,32,86,0.1)")}
-          >
-            <svg
-              width="13"
-              height="13"
-              viewBox="0 0 20 20"
-              fill="none"
-              style="flex-shrink:0"
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 20 20"
+                fill="none"
+                style="flex-shrink:0"
+              >
+                <path
+                  d="M4 10.5l4.5 4.5L16 6"
+                  stroke="#F8FAFC"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              Save
+            </button>
+            <!-- Cancel button -->
+            <button
+              onclick={cancelEdit}
+              style="display: flex; align-items: center; gap: 6px; background: #334155; color: #94A3B8; font-size: 12px; font-weight: 700; padding: 7px 14px; border-radius: 8px; border: none; cursor: pointer;"
+              onmouseenter={(e) =>
+                (e.currentTarget.style.background = "#475569")}
+              onmouseleave={(e) =>
+                (e.currentTarget.style.background = "#334155")}
             >
-              <path
-                d="M4 6h12M15.33 6v9.33A1.33 1.33 0 0 1 14 16.67H6a1.33 1.33 0 0 1-1.33-1.34V6M7.33 6V4.67A1.33 1.33 0 0 1 8.67 3.33h2.66A1.33 1.33 0 0 1 12.67 4.67V6M8.67 9.33v4M11.33 9.33v4"
-                stroke="#FF2056"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-            Delete
-          </button>
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 20 20"
+                fill="none"
+                style="flex-shrink:0"
+              >
+                <path
+                  d="M5 5l10 10M15 5L5 15"
+                  stroke="#94A3B8"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                />
+              </svg>
+              Cancel
+            </button>
+          {:else}
+            <!-- Edit button -->
+            <button
+              onclick={startEdit}
+              style="display: flex; align-items: center; gap: 6px; background: #334155; color: #F8FAFC; font-size: 12px; font-weight: 700; padding: 7px 14px; border-radius: 8px; border: none; cursor: pointer;"
+              onmouseenter={(e) =>
+                (e.currentTarget.style.background = "#475569")}
+              onmouseleave={(e) =>
+                (e.currentTarget.style.background = "#334155")}
+            >
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 20 20"
+                fill="none"
+                style="flex-shrink:0"
+              >
+                <path
+                  d="M14.7 2.29a1 1 0 0 1 1.41 0l1.6 1.6a1 1 0 0 1 0 1.42L5.46 17.56 2 18l.44-3.46L14.7 2.29Z"
+                  stroke="#F8FAFC"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              Edit
+            </button>
+            <!-- Delete button -->
+            <button
+              onclick={deleteProject}
+              style="display: flex; align-items: center; gap: 6px; background: rgba(255,32,86,0.1); color: #FF2056; font-size: 12px; font-weight: 700; padding: 7px 14px; border-radius: 8px; border: 1px solid rgba(255,32,86,0.3); cursor: pointer;"
+              onmouseenter={(e) =>
+                (e.currentTarget.style.background = "rgba(255,32,86,0.2)")}
+              onmouseleave={(e) =>
+                (e.currentTarget.style.background = "rgba(255,32,86,0.1)")}
+            >
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 20 20"
+                fill="none"
+                style="flex-shrink:0"
+              >
+                <path
+                  d="M4 6h12M15.33 6v9.33A1.33 1.33 0 0 1 14 16.67H6a1.33 1.33 0 0 1-1.33-1.34V6M7.33 6V4.67A1.33 1.33 0 0 1 8.67 3.33h2.66A1.33 1.33 0 0 1 12.67 4.67V6M8.67 9.33v4M11.33 9.33v4"
+                  stroke="#FF2056"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              Delete
+            </button>
+          {/if}
         </div>
       </div>
 
-      <!-- Scrollable content -->
-      <div class="flex flex-col px-8 py-7 gap-8 pb-12">
-        <!-- TITLE -->
-        <div>
-          <span class="field-label">Title</span>
-          <h1
-            style="color: #F8FAFC; font-size: 30px; font-weight: 700; line-height: 1.2; margin: 0;"
-          >
-            {selectedProject.title}
-          </h1>
-        </div>
+      <!-- ── Content: View or Edit ──────────────────────── -->
+      <div
+        class="panel-body flex flex-col px-8 py-7 gap-8 pb-12"
+        class:editing={isEditing}
+      >
+        {#if isEditing}
+          <!-- ══════ EDIT FORM ══════ -->
 
-        <!-- SHORT DESCRIPTION -->
-        <div>
-          <span class="field-label">Short Description</span>
-          <p
-            style="color: #CBD5E1; font-size: 15px; line-height: 1.7; margin: 0;"
-          >
-            {selectedProject.shortDesc}
-          </p>
-        </div>
-
-        <!-- PHOTOS -->
-        <div>
-          <span
-            class="field-label"
-            style="display: flex; align-items: center; gap: 6px;"
-          >
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
-              <rect
-                x="1"
-                y="2"
-                width="14"
-                height="12"
-                rx="2"
-                stroke="#3B82F6"
-                stroke-width="1.2"
-              />
-              <circle
-                cx="5.5"
-                cy="6"
-                r="1.5"
-                stroke="#3B82F6"
-                stroke-width="1.2"
-              />
-              <path
-                d="M1 11l3.5-3.5L7 10l3-3 5 5"
-                stroke="#3B82F6"
-                stroke-width="1.2"
-                stroke-linecap="round"
-              />
-            </svg>
-            Photos
-          </span>
-          <div
-            class="w-full overflow-hidden"
-            style="aspect-ratio: 16/9; border-radius: 16px; border: 1px solid #334155; background: #1E293B;"
-          >
-            <img
-              src={selectedProject.photo}
-              alt={selectedProject.title}
-              style="width: 100%; height: 100%; object-fit: cover; display: block;"
+          <!-- Title -->
+          <div>
+            <label
+              class="field-label"
+              for="edit-title"
+              style={errors.title ? "color: #EF4444;" : ""}
+            >
+              Title {#if errors.title}<span class="required-hint">Required</span
+                >{/if}
+            </label>
+            <input
+              id="edit-title"
+              class="edit-input"
+              class:input-error={errors.title}
+              type="text"
+              bind:value={editedProject.title}
+              oninput={() => clearError("title")}
+              placeholder="Project title"
             />
           </div>
-        </div>
 
-        <!-- LONG DESCRIPTION -->
-        <div>
-          <span class="field-label">Long Description</span>
-          <div
-            style="color: #CBD5E1; font-size: 14px; line-height: 1.75; white-space: pre-wrap;"
-          >
-            {selectedProject.longDesc}
+          <!-- Application Type -->
+          <div>
+            <label
+              class="field-label"
+              for="edit-type"
+              style={errors.appType ? "color: #EF4444;" : ""}
+            >
+              Application Type {#if errors.appType}<span class="required-hint">Required</span>{/if}
+            </label>
+            <input
+              id="edit-type"
+              class="edit-input"
+              class:input-error={errors.appType}
+              type="text"
+              bind:value={editedProject.appType}
+              oninput={() => clearError("appType")}
+              placeholder="e.g. Web Application"
+            />
           </div>
-        </div>
 
-        <!-- LINKS & METADATA -->
-        <div>
-          <span
-            class="field-label"
-            style="display: flex; align-items: center; gap: 6px;"
+          <!-- Short Description -->
+          <div>
+            <label
+              class="field-label"
+              for="edit-short"
+              style={errors.shortDesc ? "color: #EF4444;" : ""}
+            >
+              Short Description {#if errors.shortDesc}<span
+                  class="required-hint">Required</span
+                >{/if}
+            </label>
+            <textarea
+              id="edit-short"
+              class="edit-textarea"
+              class:input-error={errors.shortDesc}
+              rows="3"
+              bind:value={editedProject.shortDesc}
+              oninput={() => clearError("shortDesc")}
+              placeholder="A brief, one-paragraph description..."
+            ></textarea>
+          </div>
+
+          <!-- Long Description -->
+          <div>
+            <label class="field-label" for="edit-long">Long Description</label>
+            <textarea
+              id="edit-long"
+              class="edit-textarea"
+              rows="8"
+              bind:value={editedProject.longDesc}
+              placeholder="Write the full project story here..."
+            ></textarea>
+          </div>
+
+
+          <!-- Tags -->
+          <div>
+            <label class="field-label" for="edit-tags"
+              >Tags <span
+                style="font-weight:500; text-transform:none; letter-spacing:0; color:#64748B; font-size:10px;"
+                >(comma-separated)</span
+              ></label
+            >
+            <input
+              id="edit-tags"
+              class="edit-input"
+              type="text"
+              bind:value={editedTagsString}
+              placeholder="React, TypeScript, Tailwind..."
+            />
+          </div>
+
+          <!-- Form action row (duplicate Save/Cancel at the bottom for long forms) -->
+          <div
+            style="display: flex; gap: 12px; padding-top: 8px; border-top: 1px solid #1E293B;"
           >
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
-              <path
-                d="M6.5 9.5a3 3 0 0 0 4.243 0l2-2a3 3 0 0 0-4.243-4.243L7.4 4.36M9.5 6.5a3 3 0 0 0-4.243 0l-2 2a3 3 0 0 0 4.243 4.243L8.6 11.64"
-                stroke="#3B82F6"
-                stroke-width="1.2"
-                stroke-linecap="round"
+            <button
+              onclick={saveEdit}
+              style="flex: 1; background: #2563EB; color: #F8FAFC; font-size: 13px; font-weight: 700; padding: 10px; border-radius: 10px; border: none; cursor: pointer;"
+              onmouseenter={(e) =>
+                (e.currentTarget.style.background = "#1D4ED8")}
+              onmouseleave={(e) =>
+                (e.currentTarget.style.background = "#2563EB")}
+            >
+              Save Changes
+            </button>
+            <button
+              onclick={cancelEdit}
+              style="background: transparent; color: #94A3B8; font-size: 13px; font-weight: 700; padding: 10px 20px; border-radius: 10px; border: 1px solid #334155; cursor: pointer;"
+              onmouseenter={(e) =>
+                (e.currentTarget.style.background = "#1E293B")}
+              onmouseleave={(e) =>
+                (e.currentTarget.style.background = "transparent")}
+            >
+              Cancel
+            </button>
+          </div>
+        {:else}
+          <!-- ══════ READ-ONLY VIEW ══════ -->
+
+          <!-- Title -->
+          <div>
+            <span class="field-label">Title</span>
+            <h1
+              style="color: #F8FAFC; font-size: 30px; font-weight: 700; line-height: 1.2; margin: 0;"
+            >
+              {selectedProject.title}
+            </h1>
+          </div>
+
+          <!-- Short Description -->
+          <div>
+            <span class="field-label">Short Description</span>
+            <p
+              style="color: #CBD5E1; font-size: 15px; line-height: 1.7; margin: 0;"
+            >
+              {selectedProject.shortDesc}
+            </p>
+          </div>
+
+          <!-- Photos -->
+          <div>
+            <span
+              class="field-label"
+              style="display: flex; align-items: center; gap: 6px;"
+            >
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                <rect
+                  x="1"
+                  y="2"
+                  width="14"
+                  height="12"
+                  rx="2"
+                  stroke="#3B82F6"
+                  stroke-width="1.2"
+                />
+                <circle
+                  cx="5.5"
+                  cy="6"
+                  r="1.5"
+                  stroke="#3B82F6"
+                  stroke-width="1.2"
+                />
+                <path
+                  d="M1 11l3.5-3.5L7 10l3-3 5 5"
+                  stroke="#3B82F6"
+                  stroke-width="1.2"
+                  stroke-linecap="round"
+                />
+              </svg>
+              Photos
+            </span>
+            <div
+              class="w-full overflow-hidden"
+              style="aspect-ratio: 16/9; border-radius: 16px; border: 1px solid #334155; background: #1E293B;"
+            >
+              <img
+                src={selectedProject.photo}
+                alt={selectedProject.title}
+                style="width: 100%; height: 100%; object-fit: cover; display: block;"
               />
-            </svg>
-            Links &amp; Metadata
-          </span>
-          <div
-            style="background: rgba(15,23,42,0.7); border: 1px solid #334155; border-radius: 16px; padding: 20px 24px; display: flex; flex-wrap: wrap; gap: 32px;"
-          >
-            <div>
-              <div
-                style="color: #64748B; font-size: 9px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 6px;"
-              >
-                Category
-              </div>
-              <div style="color: #F8FAFC; font-size: 14px; font-weight: 700;">
-                {selectedProject.category}
-              </div>
             </div>
-            <div style="flex: 1; min-width: 160px;">
-              <div
-                style="color: #64748B; font-size: 9px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 6px;"
-              >
-                Tags
+          </div>
+
+          <!-- Long Description -->
+          <div>
+            <span class="field-label">Long Description</span>
+            <div
+              style="color: #CBD5E1; font-size: 14px; line-height: 1.75; white-space: pre-wrap;"
+            >
+              {selectedProject.longDesc}
+            </div>
+          </div>
+
+          <!-- Links & Metadata -->
+          <div>
+            <span
+              class="field-label"
+              style="display: flex; align-items: center; gap: 6px;"
+            >
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                <path
+                  d="M6.5 9.5a3 3 0 0 0 4.243 0l2-2a3 3 0 0 0-4.243-4.243L7.4 4.36M9.5 6.5a3 3 0 0 0-4.243 0l-2 2a3 3 0 0 0 4.243 4.243L8.6 11.64"
+                  stroke="#3B82F6"
+                  stroke-width="1.2"
+                  stroke-linecap="round"
+                />
+              </svg>
+              Links &amp; Metadata
+            </span>
+            <div
+              style="background: rgba(15,23,42,0.7); border: 1px solid #334155; border-radius: 16px; padding: 20px 24px; display: flex; flex-wrap: wrap; gap: 32px;"
+            >
+              <div>
+                <div
+                  style="color: #64748B; font-size: 9px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 6px;"
+                >
+                  Application Type
+                </div>
+                <div style="color: #F8FAFC; font-size: 14px; font-weight: 700;">
+                  {selectedProject.appType}
+                </div>
               </div>
-              <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                {#each selectedProject.tags as tag}
-                  <span
-                    style="background: #1E293B; color: #CBD5E1; font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 8px; border: 1px solid #334155;"
-                  >
-                    {tag}
-                  </span>
-                {/each}
+              <div style="flex: 1; min-width: 160px;">
+                <div
+                  style="color: #64748B; font-size: 9px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 6px;"
+                >
+                  Tags
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                  {#each selectedProject.tags as tag}
+                    <span
+                      style="background: #1E293B; color: #CBD5E1; font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 8px; border: 1px solid #334155;"
+                    >
+                      {tag}
+                    </span>
+                  {/each}
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        {/if}
       </div>
     {:else}
       <div
@@ -340,7 +624,7 @@
 </div>
 
 <style>
-  /* Field label — blue, uppercase, extrabold, tiny */
+  /* ── Field label ── */
   .field-label {
     color: #3b82f6;
     font-size: 11px;
@@ -351,7 +635,74 @@
     margin-bottom: 8px;
   }
 
-  /* Custom thin scrollbars */
+  /* ── Edit inputs ── */
+  .edit-input,
+  .edit-textarea {
+    width: 100%;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    color: #f8fafc;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px 14px;
+    outline: none;
+    box-sizing: border-box;
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
+    font-family: inherit;
+    resize: vertical;
+  }
+
+  .edit-input:focus,
+  .edit-textarea:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  }
+
+  .edit-input::placeholder,
+  .edit-textarea::placeholder {
+    color: #475569;
+  }
+
+  /* ── Validation error state ── */
+  .input-error {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12) !important;
+  }
+
+  .required-hint {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 4px;
+    padding: 1px 5px;
+    margin-left: 6px;
+    vertical-align: middle;
+    text-transform: uppercase;
+  }
+
+  /* ── Panel body transition ── */
+  .panel-body {
+    animation: fadeIn 0.15s ease;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* ── Scrollbars ── */
   .sidebar-scroll::-webkit-scrollbar,
   .detail-scroll::-webkit-scrollbar {
     width: 4px;

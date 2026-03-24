@@ -7,10 +7,10 @@ dist/
 node_modules/
 
 # logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
+my-design-system/pm-debug.log*
+my-design-system/arn-debug.log*
+my-design-system/arn-error.log*
+my-design-system/npm-debug.log*
 
 
 # environment variables
