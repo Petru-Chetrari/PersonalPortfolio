@@ -1,6 +1,7 @@
 ---
 import Header from '../components/Header.svelte';
 import Footer from '../components/Footer.svelte';
+import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
 ---
 
@@ -11,6 +12,7 @@ import '../styles/global.css';
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
 		<title>Astro</title>
+		<ClientRouter />
 	</head>
 	<body class="bg-slate-900 text-slate-50 min-h-screen flex flex-col items-center">
 		<Header client:load />

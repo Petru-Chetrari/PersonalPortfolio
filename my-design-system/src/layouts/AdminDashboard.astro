@@ -4,6 +4,7 @@ import AdminNav from '../components/AdminNav.svelte';
 import '../styles/global.css';
 
 const imgIcon3 = "http://localhost:3845/assets/5c0e52a784517cf9364c0a316fa429c49d141322.svg";
+const currentPath = Astro.url.pathname;
 ---
 
 <Layout>
@@ -15,9 +16,11 @@ const imgIcon3 = "http://localhost:3845/assets/5c0e52a784517cf9364c0a316fa429c49
       
       <!-- Descriptions -->
       <div class="flex flex-col gap-[8px] items-start flex-1 min-w-[300px]">
-        <h1 class="font-['Segoe_UI',sans-serif] font-bold text-[30px] leading-[36px] tracking-[-0.75px] text-slate-50 m-0">
-          Admin Portal
-        </h1>
+        <a href="/admin" class="no-underline hover:opacity-80 transition-opacity">
+          <h1 class="font-['Segoe_UI',sans-serif] font-bold text-[30px] leading-[36px] tracking-[-0.75px] text-slate-50 m-0">
+            Admin Portal
+          </h1>
+        </a>
         <p class="font-['Segoe_UI_Emoji',sans-serif] text-[16px] leading-[24px] text-slate-400 m-0">
           Manage all your commissions, projects, and review requests.
         </p>
@@ -26,7 +29,7 @@ const imgIcon3 = "http://localhost:3845/assets/5c0e52a784517cf9364c0a316fa429c49
       <!-- Actions -->
       <div class="flex items-center gap-[16px] h-fit md:h-[45.6px]">
         <!-- Top bar navigation -->
-        <AdminNav client:load />
+        <AdminNav client:load currentPath={currentPath} />
 
         <!-- Settings Button -->
         <button class="bg-slate-800 border-slate-700 border-[0.8px] border-solid rounded-[10px] h-[37.6px] px-[16px] flex items-center justify-center gap-2 hover:bg-slate-700 transition-colors shadow-sm">
@@ -39,7 +42,7 @@ const imgIcon3 = "http://localhost:3845/assets/5c0e52a784517cf9364c0a316fa429c49
     <!-- Content slot — ProjectManager renders directly into this card -->
     <div
       class="border-solid rounded-[24px] shadow-xl w-full overflow-hidden"
-      style="background-color: #151B28; border: 1px solid #1E293B; min-height: 600px;"
+      style="background-color:rgba(30, 41, 59, 0.5); border: 1px solid #1E293B; min-height: 600px; padding: 17px;"
     >
       <slot />
     </div>
