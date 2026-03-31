@@ -156,6 +156,8 @@ import Layout from '../../layouts/Layout.astro';
   </div>
 
   <script>
+    import { MockRepository } from '../../lib/mock-repository';
+
     const fields = [
       { id: 'c-title', errId: 'c-title-err', label: 'title' },
       { id: 'c-type', errId: 'c-type-err', label: 'type' },
@@ -187,6 +189,23 @@ import Layout from '../../layouts/Layout.astro';
       });
 
       if (valid) {
+        // Collect data and push to repo
+        const title = (document.getElementById('c-title') as HTMLInputElement).value;
+        const appType = (document.getElementById('c-type') as HTMLSelectElement).value;
+        const shortDesc = (document.getElementById('c-short') as HTMLInputElement).value;
+        const longDesc = (document.getElementById('c-long') as HTMLTextAreaElement).value;
+        const budget = (document.getElementById('c-budget') as HTMLInputElement).value;
+        
+        MockRepository.addCommission({
+          client: 'Current User', // simulate auth user
+          title,
+          appType,
+          shortDesc,
+          longDesc,
+          budget
+        });
+
+        // Hide form, show success
         document.getElementById('commission-form')!.style.display = 'none';
         document.getElementById('success-state')!.classList.remove('hidden');
         document.getElementById('success-state')!.style.display = 'flex';

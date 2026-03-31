@@ -52,25 +52,7 @@ import AdminDashboard from '../../../layouts/AdminDashboard.astro';
   </div>
 
   <script>
-    type Status = 'pending' | 'active' | 'completed' | 'overdue';
-    interface Commission {
-      id: string;
-      client: string;
-      title: string;
-      appType: string;
-      status: Status;
-      date: string;
-      dueDate: string;
-    }
-
-    const commissions: Commission[] = [
-      { id: 'COM-001', client: 'Alex M.', title: 'Portfolio Website Redesign', appType: 'Web App', status: 'active', date: '2026-03-20', dueDate: '2026-04-15' },
-      { id: 'COM-002', client: 'Sarah K.', title: 'E-commerce Dashboard', appType: 'Web App', status: 'pending', date: '2026-03-28', dueDate: '2026-04-30' },
-      { id: 'COM-003', client: 'Jordan T.', title: 'Mobile App UI Design', appType: 'Mobile App', status: 'completed', date: '2026-03-01', dueDate: '2026-03-25' },
-      { id: 'COM-004', client: 'Priya S.', title: 'SaaS Landing Page', appType: 'Marketing', status: 'overdue', date: '2026-02-15', dueDate: '2026-03-10' },
-      { id: 'COM-005', client: 'Marco R.', title: 'Brand Identity System', appType: 'Design', status: 'active', date: '2026-03-22', dueDate: '2026-04-20' },
-      { id: 'COM-006', client: 'Liu W.', title: 'Admin Panel Overhaul', appType: 'Web App', status: 'pending', date: '2026-03-30', dueDate: '2026-05-01' },
-    ];
+    import { MockRepository, type Commission, type Status } from '../../../lib/mock-repository';
 
     const statusConfig: Record<Status, {label: string; color: string; bg: string; dot: string}> = {
       pending:   { label: 'Pending',   color: '#FFB900', bg: 'rgba(255,185,0,0.1)',   dot: '#FFB900' },
@@ -81,8 +63,16 @@ import AdminDashboard from '../../../layouts/AdminDashboard.astro';
 
     function renderRow(c: Commission): string {
       const s = statusConfig[c.status];
+      
+      let actionBtn = '';
+      if (c.status === 'pending') {
+        actionBtn = `<button class="action-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors border border-emerald-500/20 font-['Segoe_UI',sans-serif] shrink-0" data-id="${c.id}" data-action="active">Approve</button>`;
+      } else if (c.status === 'active') {
+        actionBtn = `<button class="action-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors border border-blue-500/20 font-['Segoe_UI',sans-serif] shrink-0" data-id="${c.id}" data-action="completed">Complete</button>`;
+      }
+
       return `
-        <div class="commission-row flex items-center gap-4 rounded-2xl px-5 py-4 transition-colors duration-150 hover:brightness-110 cursor-pointer"
+        <div class="commission-row flex items-center gap-4 rounded-2xl px-5 py-4 transition-colors duration-150 hover:brightness-110"
           data-status="${c.status}"
           style="background-color: #1E293B; border: 1px solid #334155;">
           
@@ -114,44 +104,66 @@ import AdminDashboard from '../../../layouts/AdminDashboard.astro';
             ${s.label}
           </div>
 
-          <!-- Arrow -->
-          <svg class="shrink-0 text-slate-600" width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M6 4l4 4-4 4" stroke="#64748B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+          ${actionBtn || `<svg class="shrink-0 text-slate-600" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="#64748B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`}
         </div>
       `;
     }
 
-    function renderList(filter: string) {
-      const list = document.getElementById('commission-list')!;
-      const empty = document.getElementById('empty-state')!;
-      const filtered = filter === 'all' ? commissions : commissions.filter(c => c.status === filter);
+    function initAdminCommissions() {
+      const list = document.getElementById('commission-list');
+      if (!list) return;
 
-      if (filtered.length === 0) {
-        list.innerHTML = '';
-        empty.classList.remove('hidden');
-      } else {
-        empty.classList.add('hidden');
-        list.innerHTML = filtered.map(renderRow).join('');
-      }
+      let currentFilter = 'all';
+
+      const renderList = () => {
+        const commissions = MockRepository.getCommissions();
+        const empty = document.getElementById('empty-state')!;
+        const filtered = currentFilter === 'all' ? commissions : commissions.filter(c => c.status === currentFilter);
+
+        if (filtered.length === 0) {
+          list.innerHTML = '';
+          empty.classList.remove('hidden');
+        } else {
+          empty.classList.add('hidden');
+          list.innerHTML = filtered.map(renderRow).join('');
+          
+          // Attach action listeners
+          list.querySelectorAll<HTMLButtonElement>('.action-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const id = btn.dataset.id!;
+              const newStatus = btn.dataset.action as Status;
+              
+              MockRepository.updateCommissionStatus(id, newStatus);
+              renderList(); // re-render instantly!
+            });
+          });
+        }
+      };
+
+      // Filter button logic
+      const filterBtns = document.querySelectorAll<HTMLButtonElement>('.filter-btn');
+      filterBtns.forEach(btn => {
+        const newBtn = btn.cloneNode(true) as HTMLButtonElement;
+        btn.parentNode?.replaceChild(newBtn, btn);
+
+        newBtn.addEventListener('click', () => {
+          document.querySelectorAll<HTMLButtonElement>('.filter-btn').forEach(b => {
+            b.style.backgroundColor = '#1E293B';
+            b.style.color = '#94A3B8';
+            b.style.border = '1px solid #334155';
+          });
+          newBtn.style.backgroundColor = '#3B82F6';
+          newBtn.style.color = '#fff';
+          newBtn.style.border = 'none';
+          currentFilter = newBtn.dataset.filter!;
+          renderList();
+        });
+      });
+
+      renderList();
     }
 
-    // Filter button logic
-    const filterBtns = document.querySelectorAll<HTMLButtonElement>('.filter-btn');
-    filterBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        filterBtns.forEach(b => {
-          b.style.backgroundColor = '#1E293B';
-          b.style.color = '#94A3B8';
-          b.style.border = '1px solid #334155';
-        });
-        btn.style.backgroundColor = '#3B82F6';
-        btn.style.color = '#fff';
-        btn.style.border = 'none';
-        renderList(btn.dataset.filter!);
-      });
-    });
-
-    renderList('all');
+    document.addEventListener('astro:page-load', initAdminCommissions);
   </script>
 </AdminDashboard>

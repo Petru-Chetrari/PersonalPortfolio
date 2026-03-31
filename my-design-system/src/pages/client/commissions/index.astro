@@ -64,14 +64,7 @@ import ClientPortal from '../../../layouts/ClientPortal.astro';
   </div>
 
   <script>
-    type Status = 'pending' | 'active' | 'completed' | 'overdue';
-    interface Commission { id: string; title: string; appType: string; submitted: string; due: string; status: Status; note?: string; }
-
-    const data: Commission[] = [
-      { id: 'COM-001', title: 'Portfolio Website Redesign', appType: 'Web App', submitted: '2026-03-20', due: '2026-04-15', status: 'active', note: 'Wire-frames sent, awaiting feedback on hero section.' },
-      { id: 'COM-002', title: 'E-commerce Dashboard', appType: 'Web App', submitted: '2026-03-28', due: '2026-04-30', status: 'pending', note: 'Will review within 2 business days.' },
-      { id: 'COM-003', title: 'Mobile App UI Design', appType: 'Mobile App', submitted: '2026-03-01', due: '2026-03-25', status: 'completed', note: 'All deliverables sent. Great working with you!' },
-    ];
+    import { MockRepository, type Commission, type Status } from '../../../lib/mock-repository';
 
     const statusConfig: Record<Status, {label: string; color: string; bg: string; border: string}> = {
       pending:   { label: 'Pending',   color: '#FFB900', bg: 'rgba(255,185,0,0.08)',  border: 'rgba(255,185,0,0.2)' },
@@ -111,8 +104,8 @@ import ClientPortal from '../../../layouts/ClientPortal.astro';
 
           <!-- Dates -->
           <div class="flex items-center justify-between text-xs text-slate-500 font-['Segoe_UI_Emoji',sans-serif]">
-            <span>Submitted: ${c.submitted}</span>
-            <span>Due: ${c.due}</span>
+            <span>Submitted: ${c.date}</span>
+            <span>Due: ${c.dueDate}</span>
           </div>
 
           <!-- Progress bar (active only) -->
@@ -130,33 +123,50 @@ import ClientPortal from '../../../layouts/ClientPortal.astro';
       `;
     }
 
-    function render(filter: string) {
-      const grid = document.getElementById('card-grid')!;
-      const empty = document.getElementById('client-empty')!;
-      const rows = filter === 'all' ? data : data.filter(c => c.status === filter);
+    function initClient() {
+      const grid = document.getElementById('card-grid');
+      if (!grid) return; // Exit if not on the page
 
-      if (rows.length === 0) {
-        grid.innerHTML = '';
-        empty.classList.remove('hidden');
-        empty.style.display = 'flex';
-      } else {
-        empty.classList.add('hidden');
-        empty.style.display = '';
-        grid.innerHTML = rows.map(renderCard).join('');
-      }
+      const data = MockRepository.getClientCommissions();
+      let currentFilter = 'all';
+
+      const render = (filter: string) => {
+        const empty = document.getElementById('client-empty')!;
+        const rows = filter === 'all' ? data : data.filter(c => c.status === filter);
+
+        if (rows.length === 0) {
+          grid.innerHTML = '';
+          empty.classList.remove('hidden');
+          empty.style.display = 'flex';
+        } else {
+          empty.classList.add('hidden');
+          empty.style.display = '';
+          grid.innerHTML = rows.map(renderCard).join('');
+        }
+      };
+
+      // Tabs
+      const tabs = document.querySelectorAll<HTMLButtonElement>('.tab-btn');
+      tabs.forEach(btn => {
+        // Remove old listeners to prevent duplicates on soft reload
+        const newBtn = btn.cloneNode(true) as HTMLButtonElement;
+        btn.parentNode?.replaceChild(newBtn, btn);
+
+        newBtn.addEventListener('click', () => {
+          document.querySelectorAll<HTMLButtonElement>('.tab-btn').forEach(b => { 
+            b.style.backgroundColor = ''; b.style.color = '#64748B'; 
+          });
+          newBtn.style.backgroundColor = '#3B82F6';
+          newBtn.style.color = '#fff';
+          currentFilter = newBtn.dataset.filter!;
+          render(currentFilter);
+        });
+      });
+
+      render(currentFilter);
     }
 
-    // Tabs
-    const tabs = document.querySelectorAll<HTMLButtonElement>('.tab-btn');
-    tabs.forEach(btn => {
-      btn.addEventListener('click', () => {
-        tabs.forEach(b => { b.style.backgroundColor = ''; b.style.color = '#64748B'; });
-        btn.style.backgroundColor = '#3B82F6';
-        btn.style.color = '#fff';
-        render(btn.dataset.filter!);
-      });
-    });
-
-    render('all');
+    // Run on initial load and view transitions
+    document.addEventListener('astro:page-load', initClient);
   </script>
 </ClientPortal>
