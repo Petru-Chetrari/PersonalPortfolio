@@ -1,10 +1,8 @@
 <script>
   let { className = "" } = $props();
 
-  const imgLogo1 =
-    "http://localhost:3845/assets/cd923e4c4859f71855a6ff703603b658d7cea48b.svg";
-  const imgText1 =
-    "http://localhost:3845/assets/dae86770ab1124c6bdb6038a4ffff8be12eb2aca.svg";
+  import imgLogo1 from "../assets/logo.svg";
+  import imgText1 from "../assets/brand-text.svg";
 </script>
 
 <footer
@@ -19,14 +17,14 @@
         <img
           alt="Logo"
           class="absolute block max-w-none size-full"
-          src={imgLogo1}
+          src={imgLogo1.src}
         />
       </div>
       <div class="relative w-[50.828px] h-[12px] shrink-0">
         <img
           alt="Brand Text"
           class="absolute block max-w-none size-full"
-          src={imgText1}
+          src={imgText1.src}
         />
       </div>
     </div>

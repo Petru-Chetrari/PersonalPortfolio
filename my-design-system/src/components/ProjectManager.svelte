@@ -1,7 +1,6 @@
 <script lang="ts">
   import { validateProject, type ValidationErrors } from '../lib/validation';
-  const imgImageAuraAnalyticsDashboard =
-    "http://localhost:3845/assets/bee0d7335ba9c7d1cb6f76e9c25452666693add1.png";
+  import imgImageAuraAnalyticsDashboard from '../assets/aura-dashboard.svg?url';
 
   // ─── Project Data ──────────────────────────────────────────────
   const projects = $state([

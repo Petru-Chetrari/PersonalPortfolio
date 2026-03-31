@@ -3,7 +3,7 @@ import Layout from './Layout.astro';
 import AdminNav from '../components/AdminNav.svelte';
 import '../styles/global.css';
 
-const imgIcon3 = "http://localhost:3845/assets/5c0e52a784517cf9364c0a316fa429c49d141322.svg";
+import imgIcon3 from '../assets/icon-settings.svg';
 const currentPath = Astro.url.pathname;
 ---
 
@@ -33,7 +33,7 @@ const currentPath = Astro.url.pathname;
 
         <!-- Settings Button -->
         <button class="bg-slate-800 border-slate-700 border-[0.8px] border-solid rounded-[10px] h-[37.6px] px-[16px] flex items-center justify-center gap-2 hover:bg-slate-700 transition-colors shadow-sm">
-          <img src={imgIcon3} alt="Settings" class="w-4 h-4" />
+          <img src={imgIcon3.src} alt="Settings" class="w-4 h-4" />
           <span class="font-['Segoe_UI',sans-serif] text-[14px] leading-[20px] text-slate-300">Settings</span>
         </button>
       </div>
