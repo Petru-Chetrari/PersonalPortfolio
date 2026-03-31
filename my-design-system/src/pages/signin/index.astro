@@ -1,0 +1,134 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout>
+  <div class="min-h-screen flex items-center justify-center bg-slate-950 px-4 py-12">
+    <div class="w-full max-w-[440px]">
+
+      <!-- Brand -->
+      <div class="flex items-center justify-center gap-2 mb-8">
+        <svg width="17" height="20" viewBox="0 0 17 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8.5 0L17 5.25V15.75L8.5 21L0 15.75V5.25L8.5 0Z" fill="#3B82F6"/>
+        </svg>
+        <span class="text-slate-50 font-bold text-xl tracking-tight font-['Segoe_UI',sans-serif]">Antigravity</span>
+      </div>
+
+      <!-- Card -->
+      <div
+        class="rounded-2xl border border-slate-700 p-8 shadow-2xl"
+        style="background-color: rgba(30, 41, 59, 0.85); backdrop-filter: blur(12px);"
+      >
+        <div class="mb-6">
+          <h1 class="text-2xl font-bold text-slate-50 font-['Segoe_UI',sans-serif] tracking-tight">Sign in</h1>
+          <p class="text-slate-400 text-sm mt-1 font-['Segoe_UI_Emoji',sans-serif]">
+            Welcome back. Enter your credentials to continue.
+          </p>
+        </div>
+
+        <form id="signin-form" class="flex flex-col gap-4" novalidate>
+          <!-- Username -->
+          <div class="flex flex-col gap-1.5">
+            <label for="username" class="text-sm font-medium text-slate-300 font-['Segoe_UI',sans-serif]">
+              Username
+            </label>
+            <input
+              id="username"
+              name="username"
+              type="text"
+              autocomplete="username"
+              placeholder="your_username"
+              class="w-full rounded-xl px-4 py-3 text-sm text-slate-50 placeholder-slate-600 outline-none transition-all font-['Segoe_UI_Emoji',sans-serif]"
+              style="background-color: #0F172A; border: 1px solid #334155;"
+              onfocus="this.style.borderColor='#3B82F6'"
+              onblur="this.style.borderColor='#334155'"
+            />
+            <p id="username-error" class="text-xs text-red-400 hidden font-['Segoe_UI_Emoji',sans-serif]">Username is required.</p>
+          </div>
+
+          <!-- Password -->
+          <div class="flex flex-col gap-1.5">
+            <label for="password" class="text-sm font-medium text-slate-300 font-['Segoe_UI',sans-serif]">
+              Password
+            </label>
+            <div class="relative">
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autocomplete="current-password"
+                placeholder="••••••••"
+                class="w-full rounded-xl px-4 py-3 text-sm text-slate-50 placeholder-slate-600 outline-none transition-all font-['Segoe_UI_Emoji',sans-serif]"
+                style="background-color: #0F172A; border: 1px solid #334155;"
+                onfocus="this.style.borderColor='#3B82F6'"
+                onblur="this.style.borderColor='#334155'"
+              />
+            </div>
+            <p id="password-error" class="text-xs text-red-400 hidden font-['Segoe_UI_Emoji',sans-serif]">Password is required.</p>
+          </div>
+
+          <!-- Submit -->
+          <button
+            id="signin-btn"
+            type="submit"
+            class="w-full mt-2 rounded-xl py-3 px-6 flex items-center justify-center gap-2 font-semibold text-sm text-white transition-all duration-200 hover:opacity-90 active:scale-[0.98] font-['Segoe_UI',sans-serif]"
+            style="background-color: #3B82F6;"
+          >
+            Sign in
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M3 8h10M9 4l4 4-4 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </form>
+
+        <div class="mt-6 pt-6 border-t border-slate-700 text-center">
+          <p class="text-sm text-slate-500 font-['Segoe_UI_Emoji',sans-serif]">
+            Don't have an account?
+            <a href="/signup" class="text-blue-400 hover:text-blue-300 transition-colors ml-1">Sign up</a>
+          </p>
+        </div>
+      </div>
+
+      <!-- Footer note -->
+      <p class="text-center text-xs text-slate-600 mt-6 font-['Segoe_UI_Emoji',sans-serif]">
+        © 2026 Antigravity. All rights reserved.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('signin-form') as HTMLFormElement;
+    const usernameInput = document.getElementById('username') as HTMLInputElement;
+    const passwordInput = document.getElementById('password') as HTMLInputElement;
+    const usernameError = document.getElementById('username-error') as HTMLElement;
+    const passwordError = document.getElementById('password-error') as HTMLElement;
+
+    form?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      let valid = true;
+
+      if (!usernameInput.value.trim()) {
+        usernameError.classList.remove('hidden');
+        usernameInput.style.borderColor = '#EF4444';
+        valid = false;
+      } else {
+        usernameError.classList.add('hidden');
+        usernameInput.style.borderColor = '#334155';
+      }
+
+      if (!passwordInput.value.trim()) {
+        passwordError.classList.remove('hidden');
+        passwordInput.style.borderColor = '#EF4444';
+        valid = false;
+      } else {
+        passwordError.classList.add('hidden');
+        passwordInput.style.borderColor = '#334155';
+      }
+
+      if (valid) {
+        // TODO: hook up real auth — redirect to admin for demo
+        window.location.href = '/admin';
+      }
+    });
+  </script>
+</Layout>

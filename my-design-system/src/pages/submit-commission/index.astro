@@ -1,0 +1,196 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout>
+  <div class="min-h-screen bg-slate-950 py-16 px-4">
+    <div class="w-full max-w-[680px] mx-auto">
+
+      <!-- Back link -->
+      <a href="/client/commissions" class="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-300 transition-colors mb-8 font-['Segoe_UI_Emoji',sans-serif]">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+          <path d="M10 12L6 8l4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        Back to my commissions
+      </a>
+
+      <!-- Header card -->
+      <div class="rounded-2xl p-6 mb-4" style="background-color: rgba(30,41,59,0.5); border: 1px solid #1E293B;">
+        <h1 class="text-2xl font-bold text-slate-50 font-['Segoe_UI',sans-serif] tracking-tight">Submit a Commission</h1>
+        <p class="text-slate-400 text-sm mt-1.5 font-['Segoe_UI_Emoji',sans-serif]">
+          Fill in the details below to request a new commission. I'll review your request and get back to you within 2 business days.
+        </p>
+      </div>
+
+      <!-- Form card -->
+      <div class="rounded-2xl p-6 shadow-xl" style="background-color: rgba(30,41,59,0.5); border: 1px solid #1E293B;">
+        <form id="commission-form" novalidate class="flex flex-col gap-5">
+
+          <!-- Title -->
+          <div class="flex flex-col gap-1.5">
+            <label for="c-title" class="text-sm font-semibold text-slate-300 font-['Segoe_UI',sans-serif]">
+              Project Title <span class="text-red-400">*</span>
+            </label>
+            <input id="c-title" name="title" type="text" placeholder="e.g. Portfolio Website Redesign"
+              class="w-full rounded-xl px-4 py-3 text-sm text-slate-50 placeholder-slate-600 outline-none transition-all font-['Segoe_UI_Emoji',sans-serif]"
+              style="background-color: #0F172A; border: 1px solid #334155;" />
+            <p id="c-title-err" class="text-xs text-red-400 hidden font-['Segoe_UI_Emoji',sans-serif]">Title is required.</p>
+          </div>
+
+          <!-- App Type -->
+          <div class="flex flex-col gap-1.5">
+            <label for="c-type" class="text-sm font-semibold text-slate-300 font-['Segoe_UI',sans-serif]">
+              Project Type <span class="text-red-400">*</span>
+            </label>
+            <select id="c-type" name="appType"
+              class="w-full rounded-xl px-4 py-3 text-sm text-slate-50 outline-none transition-all font-['Segoe_UI_Emoji',sans-serif] appearance-none cursor-pointer"
+              style="background-color: #0F172A; border: 1px solid #334155;">
+              <option value="" disabled selected class="text-slate-600">Select a project type…</option>
+              <option value="Web App">Web App</option>
+              <option value="Mobile App">Mobile App</option>
+              <option value="Landing Page">Landing Page</option>
+              <option value="E-commerce">E-commerce</option>
+              <option value="Brand Identity">Brand Identity</option>
+              <option value="Other">Other</option>
+            </select>
+            <p id="c-type-err" class="text-xs text-red-400 hidden font-['Segoe_UI_Emoji',sans-serif]">Please select a project type.</p>
+          </div>
+
+          <!-- Short Description -->
+          <div class="flex flex-col gap-1.5">
+            <label for="c-short" class="text-sm font-semibold text-slate-300 font-['Segoe_UI',sans-serif]">
+              Short Description <span class="text-red-400">*</span>
+            </label>
+            <input id="c-short" name="shortDesc" type="text" placeholder="One-line summary of your project"
+              class="w-full rounded-xl px-4 py-3 text-sm text-slate-50 placeholder-slate-600 outline-none transition-all font-['Segoe_UI_Emoji',sans-serif]"
+              style="background-color: #0F172A; border: 1px solid #334155;" />
+            <p id="c-short-err" class="text-xs text-red-400 hidden font-['Segoe_UI_Emoji',sans-serif]">Short description is required.</p>
+          </div>
+
+          <!-- Long Description -->
+          <div class="flex flex-col gap-1.5">
+            <label for="c-long" class="text-sm font-semibold text-slate-300 font-['Segoe_UI',sans-serif]">
+              Detailed Description <span class="text-red-400">*</span>
+            </label>
+            <textarea id="c-long" name="longDesc" rows="5"
+              placeholder="Describe the scope, goals, features, and any specific requirements for your project…"
+              class="w-full rounded-xl px-4 py-3 text-sm text-slate-50 placeholder-slate-600 outline-none transition-all font-['Segoe_UI_Emoji',sans-serif] resize-y min-h-[120px]"
+              style="background-color: #0F172A; border: 1px solid #334155;"></textarea>
+            <p id="c-long-err" class="text-xs text-red-400 hidden font-['Segoe_UI_Emoji',sans-serif]">Please provide a detailed description.</p>
+          </div>
+
+          <!-- Budget + Deadline row -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="flex flex-col gap-1.5">
+              <label for="c-budget" class="text-sm font-semibold text-slate-300 font-['Segoe_UI',sans-serif]">
+                Budget (USD)
+              </label>
+              <input id="c-budget" name="budget" type="number" min="0" placeholder="e.g. 2500"
+                class="w-full rounded-xl px-4 py-3 text-sm text-slate-50 placeholder-slate-600 outline-none transition-all font-['Segoe_UI_Emoji',sans-serif]"
+                style="background-color: #0F172A; border: 1px solid #334155;" />
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label for="c-deadline" class="text-sm font-semibold text-slate-300 font-['Segoe_UI',sans-serif]">
+                Desired Deadline
+              </label>
+              <input id="c-deadline" name="deadline" type="date"
+                class="w-full rounded-xl px-4 py-3 text-sm text-slate-50 outline-none transition-all font-['Segoe_UI_Emoji',sans-serif]"
+                style="background-color: #0F172A; border: 1px solid #334155; color-scheme: dark;" />
+            </div>
+          </div>
+
+          <!-- Reference URL -->
+          <div class="flex flex-col gap-1.5">
+            <label for="c-ref" class="text-sm font-semibold text-slate-300 font-['Segoe_UI',sans-serif]">
+              Reference / Inspiration URL
+            </label>
+            <input id="c-ref" name="reference" type="url" placeholder="https://example.com"
+              class="w-full rounded-xl px-4 py-3 text-sm text-slate-50 placeholder-slate-600 outline-none transition-all font-['Segoe_UI_Emoji',sans-serif]"
+              style="background-color: #0F172A; border: 1px solid #334155;" />
+          </div>
+
+          <!-- Divider -->
+          <div class="border-t" style="border-color: #1E293B;"></div>
+
+          <!-- Submit -->
+          <div class="flex items-center justify-between gap-4 flex-wrap">
+            <p class="text-xs text-slate-500 font-['Segoe_UI_Emoji',sans-serif]">
+              Fields marked <span class="text-red-400">*</span> are required.
+            </p>
+            <button
+              id="submit-btn"
+              type="submit"
+              class="px-6 py-3 rounded-xl font-semibold text-sm text-white flex items-center gap-2 transition-all duration-200 hover:opacity-90 active:scale-[0.98] font-['Segoe_UI',sans-serif]"
+              style="background-color: #3B82F6;"
+            >
+              Submit Commission
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M3 8h10M9 4l4 4-4 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+
+        </form>
+
+        <!-- Success state (hidden) -->
+        <div id="success-state" class="hidden flex flex-col items-center text-center py-10 gap-4">
+          <div class="w-16 h-16 rounded-full flex items-center justify-center" style="background-color:rgba(0,188,125,0.15); border:1px solid rgba(0,188,125,0.3);">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <path d="M20 6L9 17l-5-5" stroke="#00BC7D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-slate-50 font-['Segoe_UI',sans-serif]">Commission Submitted!</h3>
+            <p class="text-slate-400 text-sm mt-1.5 font-['Segoe_UI_Emoji',sans-serif]">
+              Thank you. I'll review your request and be in touch within 2 business days.
+            </p>
+          </div>
+          <a href="/client/commissions"
+            class="mt-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-300 transition-all hover:bg-slate-700 font-['Segoe_UI',sans-serif]"
+            style="background-color:#1E293B; border:1px solid #334155;">
+            View my commissions
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const fields = [
+      { id: 'c-title', errId: 'c-title-err', label: 'title' },
+      { id: 'c-type', errId: 'c-type-err', label: 'type' },
+      { id: 'c-short', errId: 'c-short-err', label: 'short' },
+      { id: 'c-long', errId: 'c-long-err', label: 'long' },
+    ];
+
+    // Focus effects
+    document.querySelectorAll<HTMLElement>('input, select, textarea').forEach(el => {
+      el.addEventListener('focus', () => { (el as HTMLElement).style.borderColor = '#3B82F6'; });
+      el.addEventListener('blur', () => { (el as HTMLElement).style.borderColor = '#334155'; });
+    });
+
+    document.getElementById('commission-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      let valid = true;
+
+      fields.forEach(({ id, errId }) => {
+        const el = document.getElementById(id) as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+        const err = document.getElementById(errId)!;
+        if (!el.value.trim()) {
+          err.classList.remove('hidden');
+          el.style.borderColor = '#EF4444';
+          valid = false;
+        } else {
+          err.classList.add('hidden');
+          el.style.borderColor = '#334155';
+        }
+      });
+
+      if (valid) {
+        document.getElementById('commission-form')!.style.display = 'none';
+        document.getElementById('success-state')!.classList.remove('hidden');
+        document.getElementById('success-state')!.style.display = 'flex';
+      }
+    });
+  </script>
+</Layout>

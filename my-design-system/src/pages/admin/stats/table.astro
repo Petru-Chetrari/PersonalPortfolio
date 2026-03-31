@@ -1,0 +1,173 @@
+---
+import AdminDashboard from '../../../layouts/AdminDashboard.astro';
+---
+
+<AdminDashboard>
+  <div id="admin-stats-table" class="p-2 flex flex-col gap-6">
+
+    <!-- Header row -->
+    <div class="flex items-center justify-between flex-wrap gap-3">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <a href="/admin/stats" class="text-slate-500 hover:text-slate-300 transition-colors">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M10 12L6 8l4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+          <h2 class="text-xl font-bold text-slate-50 font-['Segoe_UI',sans-serif] tracking-tight">Commissions Table</h2>
+        </div>
+        <p class="text-slate-400 text-sm font-['Segoe_UI_Emoji',sans-serif]">Full tabular view of all commission records.</p>
+      </div>
+
+      <!-- Search + Export -->
+      <div class="flex items-center gap-2">
+        <div class="relative">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <circle cx="11" cy="11" r="7" stroke="#64748B" stroke-width="1.5"/>
+            <path d="M21 21l-3-3" stroke="#64748B" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <input
+            id="search-input"
+            type="text"
+            placeholder="Search commissions…"
+            class="pl-8 pr-4 py-2 rounded-xl text-sm text-slate-200 placeholder-slate-600 outline-none transition-all w-56 font-['Segoe_UI_Emoji',sans-serif]"
+            style="background-color: #0F172A; border: 1px solid #334155;"
+          />
+        </div>
+        <button
+          id="export-btn"
+          class="px-4 py-2 rounded-xl text-sm font-semibold text-slate-300 transition-all hover:bg-slate-700 font-['Segoe_UI',sans-serif]"
+          style="background-color: #1E293B; border: 1px solid #334155;"
+        >
+          Export CSV
+        </button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="rounded-2xl overflow-hidden" style="background-color: #0F172A; border: 1px solid #334155;">
+      <table class="w-full text-sm" id="stats-table">
+        <thead>
+          <tr style="background-color: #111827; border-bottom: 1px solid #1E293B;">
+            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider font-['Segoe_UI',sans-serif] cursor-pointer hover:text-slate-300" data-col="id">ID</th>
+            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider font-['Segoe_UI',sans-serif] cursor-pointer hover:text-slate-300" data-col="title">Title</th>
+            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider font-['Segoe_UI',sans-serif] hidden md:table-cell" data-col="client">Client</th>
+            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider font-['Segoe_UI',sans-serif] hidden lg:table-cell" data-col="appType">Type</th>
+            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider font-['Segoe_UI',sans-serif] hidden md:table-cell" data-col="submitted">Submitted</th>
+            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider font-['Segoe_UI',sans-serif] hidden md:table-cell" data-col="due">Due</th>
+            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider font-['Segoe_UI',sans-serif]" data-col="status">Status</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+        </tbody>
+      </table>
+
+      <!-- Pagination -->
+      <div class="flex items-center justify-between px-5 py-3" style="border-top: 1px solid #1E293B;">
+        <p class="text-xs text-slate-500 font-['Segoe_UI_Emoji',sans-serif]" id="pagination-info">Showing 1–10 of 12</p>
+        <div class="flex items-center gap-1">
+          <button id="prev-page" class="px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-slate-200 transition-colors font-['Segoe_UI',sans-serif]" style="background-color:#1E293B; border:1px solid #334155;">← Prev</button>
+          <button id="next-page" class="px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-slate-200 transition-colors font-['Segoe_UI',sans-serif]" style="background-color:#1E293B; border:1px solid #334155;">Next →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    type Status = 'pending' | 'active' | 'completed' | 'overdue';
+    interface Row {
+      id: string; title: string; client: string; appType: string;
+      submitted: string; due: string; status: Status;
+    }
+
+    const allRows: Row[] = [
+      { id: 'COM-001', title: 'Portfolio Website Redesign', client: 'Alex M.', appType: 'Web App', submitted: '2026-03-20', due: '2026-04-15', status: 'active' },
+      { id: 'COM-002', title: 'E-commerce Dashboard', client: 'Sarah K.', appType: 'Web App', submitted: '2026-03-28', due: '2026-04-30', status: 'pending' },
+      { id: 'COM-003', title: 'Mobile App UI Design', client: 'Jordan T.', appType: 'Mobile App', submitted: '2026-03-01', due: '2026-03-25', status: 'completed' },
+      { id: 'COM-004', title: 'SaaS Landing Page', client: 'Priya S.', appType: 'Marketing', submitted: '2026-02-15', due: '2026-03-10', status: 'overdue' },
+      { id: 'COM-005', title: 'Brand Identity System', client: 'Marco R.', appType: 'Design', submitted: '2026-03-22', due: '2026-04-20', status: 'active' },
+      { id: 'COM-006', title: 'Admin Panel Overhaul', client: 'Liu W.', appType: 'Web App', submitted: '2026-03-30', due: '2026-05-01', status: 'pending' },
+      { id: 'COM-007', title: 'Newsletter Template', client: 'Hannah B.', appType: 'Email', submitted: '2026-03-10', due: '2026-03-28', status: 'completed' },
+      { id: 'COM-008', title: 'CRM Integration UI', client: 'Dev Corp', appType: 'Web App', submitted: '2026-03-15', due: '2026-04-05', status: 'active' },
+      { id: 'COM-009', title: 'iOS App Redesign', client: 'Nadia L.', appType: 'Mobile App', submitted: '2026-02-28', due: '2026-03-18', status: 'overdue' },
+      { id: 'COM-010', title: 'Analytics Dashboard', client: 'Ben W.', appType: 'Web App', submitted: '2026-03-05', due: '2026-04-10', status: 'active' },
+      { id: 'COM-011', title: 'Company Website', client: 'Forge Inc.', appType: 'Web App', submitted: '2026-03-25', due: '2026-05-15', status: 'pending' },
+      { id: 'COM-012', title: 'Blog Platform', client: 'Mia C.', appType: 'Web App', submitted: '2026-03-18', due: '2026-04-08', status: 'completed' },
+    ];
+
+    const statusConfig: Record<Status, {color: string; bg: string}> = {
+      pending:   { color: '#FFB900', bg: 'rgba(255,185,0,0.1)' },
+      active:    { color: '#00BC7D', bg: 'rgba(0,188,125,0.1)' },
+      completed: { color: '#3B82F6', bg: 'rgba(59,130,246,0.1)' },
+      overdue:   { color: '#FF2056', bg: 'rgba(255,32,86,0.1)' },
+    };
+
+    let filtered = [...allRows];
+    let page = 0;
+    const pageSize = 6;
+
+    function renderTable() {
+      const tbody = document.getElementById('table-body')!;
+      const info = document.getElementById('pagination-info')!;
+      const start = page * pageSize;
+      const pageRows = filtered.slice(start, start + pageSize);
+
+      tbody.innerHTML = pageRows.map((r, i) => {
+        const s = statusConfig[r.status];
+        return `
+          <tr class="border-t transition-colors duration-100 hover:brightness-125"
+            style="border-color:#1E293B; background-color:${i%2===0?'transparent':'rgba(30,41,59,0.3)'}">
+            <td class="px-5 py-3 text-xs font-mono text-slate-500 font-['Segoe_UI_Emoji',sans-serif]">${r.id}</td>
+            <td class="px-5 py-3 text-slate-200 font-medium font-['Segoe_UI',sans-serif] max-w-[180px] truncate">${r.title}</td>
+            <td class="px-5 py-3 text-slate-400 font-['Segoe_UI_Emoji',sans-serif] hidden md:table-cell">${r.client}</td>
+            <td class="px-5 py-3 text-slate-500 text-xs font-['Segoe_UI_Emoji',sans-serif] hidden lg:table-cell">${r.appType}</td>
+            <td class="px-5 py-3 text-slate-500 text-xs font-['Segoe_UI_Emoji',sans-serif] hidden md:table-cell">${r.submitted}</td>
+            <td class="px-5 py-3 text-slate-500 text-xs font-['Segoe_UI_Emoji',sans-serif] hidden md:table-cell">${r.due}</td>
+            <td class="px-5 py-3">
+              <span class="px-2.5 py-1 rounded-full text-xs font-semibold font-['Segoe_UI',sans-serif]"
+                style="background-color:${s.bg}; color:${s.color};">
+                ${r.status.charAt(0).toUpperCase() + r.status.slice(1)}
+              </span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      const total = filtered.length;
+      info.textContent = `Showing ${start + 1}–${Math.min(start + pageSize, total)} of ${total}`;
+
+      (document.getElementById('prev-page') as HTMLButtonElement).disabled = page === 0;
+      (document.getElementById('next-page') as HTMLButtonElement).disabled = start + pageSize >= total;
+    }
+
+    // Search
+    document.getElementById('search-input')?.addEventListener('input', (e) => {
+      const q = (e.target as HTMLInputElement).value.toLowerCase();
+      filtered = allRows.filter(r =>
+        r.title.toLowerCase().includes(q) ||
+        r.client.toLowerCase().includes(q) ||
+        r.id.toLowerCase().includes(q) ||
+        r.status.toLowerCase().includes(q)
+      );
+      page = 0;
+      renderTable();
+    });
+
+    // Pagination
+    document.getElementById('prev-page')?.addEventListener('click', () => { if (page > 0) { page--; renderTable(); } });
+    document.getElementById('next-page')?.addEventListener('click', () => { if ((page + 1) * pageSize < filtered.length) { page++; renderTable(); } });
+
+    // Export CSV
+    document.getElementById('export-btn')?.addEventListener('click', () => {
+      const header = 'ID,Title,Client,Type,Submitted,Due,Status\n';
+      const rows = allRows.map(r => `${r.id},"${r.title}","${r.client}",${r.appType},${r.submitted},${r.due},${r.status}`).join('\n');
+      const blob = new Blob([header + rows], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'commissions.csv'; a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    renderTable();
+  </script>
+</AdminDashboard>

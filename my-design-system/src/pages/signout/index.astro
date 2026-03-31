@@ -1,0 +1,64 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout>
+  <div class="min-h-screen flex items-center justify-center bg-slate-950 px-4 py-12">
+    <div class="w-full max-w-[440px]">
+
+      <!-- Brand -->
+      <div class="flex items-center justify-center gap-2 mb-8">
+        <svg width="17" height="20" viewBox="0 0 17 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8.5 0L17 5.25V15.75L8.5 21L0 15.75V5.25L8.5 0Z" fill="#3B82F6"/>
+        </svg>
+        <span class="text-slate-50 font-bold text-xl tracking-tight font-['Segoe_UI',sans-serif]">Antigravity</span>
+      </div>
+
+      <!-- Card -->
+      <div
+        class="rounded-2xl border border-slate-700 p-8 shadow-2xl text-center"
+        style="background-color: rgba(30, 41, 59, 0.85); backdrop-filter: blur(12px);"
+      >
+        <!-- Icon -->
+        <div class="flex items-center justify-center w-16 h-16 rounded-full mx-auto mb-5" style="background-color: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2);">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke="#3B82F6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+        <h1 class="text-2xl font-bold text-slate-50 font-['Segoe_UI',sans-serif] tracking-tight mb-2">Sign out</h1>
+        <p class="text-slate-400 text-sm font-['Segoe_UI_Emoji',sans-serif] mb-8">
+          Are you sure you want to sign out of your account?
+        </p>
+
+        <div class="flex flex-col gap-3">
+          <button
+            id="signout-confirm"
+            type="button"
+            class="w-full rounded-xl py-3 px-6 flex items-center justify-center gap-2 font-semibold text-sm text-white transition-all duration-200 hover:opacity-90 active:scale-[0.98] font-['Segoe_UI',sans-serif]"
+            style="background-color: #3B82F6;"
+          >
+            Yes, sign me out
+          </button>
+          <a
+            href="/admin"
+            class="w-full rounded-xl py-3 px-6 flex items-center justify-center gap-2 font-semibold text-sm text-slate-300 transition-all duration-200 hover:bg-slate-700 font-['Segoe_UI',sans-serif]"
+            style="background-color: #1E293B; border: 1px solid #334155;"
+          >
+            Cancel
+          </a>
+        </div>
+      </div>
+
+      <p class="text-center text-xs text-slate-600 mt-6 font-['Segoe_UI_Emoji',sans-serif]">
+        © 2026 Antigravity. All rights reserved.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('signout-confirm')?.addEventListener('click', () => {
+      window.location.href = '/signin';
+    });
+  </script>
+</Layout>
