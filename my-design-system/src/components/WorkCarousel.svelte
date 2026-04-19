@@ -1,33 +1,26 @@
 <script lang="ts">
-  import type { Project } from "../lib/mock-repository.svelte";
+  import type { Project } from '../lib/mock-repository.svelte';
+  import { fly } from 'svelte/transition';
 
   export let projects: Project[] = [];
 
-  let carouselTrack: HTMLElement;
+  let currentIndex = 0;
 
-  function scrollPrev() {
-    if (carouselTrack) {
-      // Calculate scroll amount based on the width of a single slide + gap
-      const slide = carouselTrack.firstElementChild as HTMLElement;
-      const scrollAmount = slide
-        ? slide.offsetWidth + 24
-        : carouselTrack.clientWidth; // 24px is var(--space-6)
-      carouselTrack.scrollBy({ left: -scrollAmount, behavior: "smooth" });
-    }
+  // Derive the currently active project
+  $: currentProject = projects[currentIndex] || null;
+
+  function next() {
+    if (projects.length === 0) return;
+    currentIndex = (currentIndex + 1) % projects.length;
   }
 
-  function scrollNext() {
-    if (carouselTrack) {
-      const slide = carouselTrack.firstElementChild as HTMLElement;
-      const scrollAmount = slide
-        ? slide.offsetWidth + 24
-        : carouselTrack.clientWidth;
-      carouselTrack.scrollBy({ left: scrollAmount, behavior: "smooth" });
-    }
+  function prev() {
+    if (projects.length === 0) return;
+    currentIndex = (currentIndex - 1 + projects.length) % projects.length;
   }
 </script>
 
-<section id="work" class="carousel-section" aria-labelledby="carousel-heading">
+<section id="work" class="split-carousel" aria-labelledby="carousel-heading">
   <div class="carousel-header">
     <div class="carousel-header-text">
       <h2 id="carousel-heading" class="carousel-title">Selected Work</h2>
@@ -37,66 +30,63 @@
       </p>
     </div>
     <div class="carousel-nav">
-      <button
-        class="nav-btn"
-        on:click={scrollPrev}
-        aria-label="Previous project"
-      >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-          ><path
-            d="M15 18L9 12L15 6"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          /></svg
-        >
+      <button class="nav-btn" on:click={prev} aria-label="Previous project">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
-      <button class="nav-btn" on:click={scrollNext} aria-label="Next project">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-          ><path
-            d="M9 18L15 12L9 6"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          /></svg
-        >
+      <button class="nav-btn" on:click={next} aria-label="Next project">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
     </div>
   </div>
 
-  <div class="carousel-track-wrapper">
-    <div class="carousel-track" bind:this={carouselTrack}></div>
-  </div>
+  {#if currentProject}
+    <div class="carousel-content">
+      
+      <!-- 1. The Image Viewport (Animated) -->
+      <div class="image-viewport">
+        {#key currentIndex}
+          <!-- 
+            in:fly slides in from the top (-100%) without fading (opacity: 1).
+            out:fly keeps the old image exactly in place (y: 0) without fading, 
+            so the incoming image seamlessly covers it.
+          -->
+          <div 
+            class="image-layer"
+            in:fly={{ y: '-100%', duration: 600, opacity: 1 }}
+            out:fly={{ y: '0%', duration: 600, opacity: 1 }}
+          >
+            <img 
+              src={currentProject.image} 
+              alt={currentProject.imageAlt} 
+              class="slide-image" 
+            />
+          </div>
+        {/key}
+      </div>
+
+      <!-- 2. The Text Viewport (Static Swap) -->
+      <div class="text-viewport">
+        <div class="slide-meta">
+          <span class="slide-type">{currentProject.type}</span>
+          <h3 class="slide-title">{currentProject.title}</h3>
+        </div>
+        
+        <p class="slide-desc">{currentProject.desc}</p>
+        
+        <div class="slide-tags">
+          {#each currentProject.tags as tag}
+            <span class="slide-tag">{tag}</span>
+          {/each}
+        </div>
+      </div>
+
+    </div>
+  {/if}
 </section>
-{#each projects as project}
-  <article class="carousel-slide">
-    <div class="slide-image-wrapper">
-      <img
-        src={project.image}
-        alt={project.imageAlt}
-        class="slide-image"
-        loading="lazy"
-      />
-    </div>
-    <div class="slide-content">
-      <div class="slide-meta">
-        <span class="slide-type">{project.type}</span>
-        <h3 class="slide-title">{project.title}</h3>
-      </div>
-      <p class="slide-desc">{project.desc}</p>
-      <div class="slide-tags">
-        {#each project.tags as tag}
-          <span class="slide-tag">{tag}</span>
-        {/each}
-      </div>
-    </div>
-  </article>
-{/each}
 
 <style>
-  .carousel-section {
+  /* ── Base Layout ── */
+  .split-carousel {
     display: flex;
     flex-direction: column;
     gap: var(--space-10);
@@ -107,13 +97,14 @@
     z-index: var(--z-base);
   }
 
+  /* ── Header ── */
   .carousel-header {
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
     position: relative;
   }
-
+  
   @media (min-width: 768px) {
     .carousel-header {
       flex-direction: row;
@@ -147,6 +138,7 @@
     max-width: 600px;
   }
 
+  /* ── Navigation ── */
   .carousel-nav {
     display: flex;
     gap: var(--space-3);
@@ -179,92 +171,77 @@
     transform: translateY(0) scale(0.95);
   }
 
-  .carousel-track-wrapper {
-    width: 100%;
-  }
-
-  .carousel-track {
-    display: flex;
-    gap: var(--space-6);
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    padding-bottom: var(--space-6); /* Room for focus rings / shadows */
-
-    /* Hide scrollbar but keep functionality */
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-
-  .carousel-track::-webkit-scrollbar {
-    display: none;
-  }
-
-  .carousel-slide {
-    flex: 0 0 100%;
-    scroll-snap-align: start;
+  /* ── Split Content Container ── */
+  .carousel-content {
     display: flex;
     flex-direction: column;
     background-color: var(--color-bg-surface);
     border: var(--border-thin) solid var(--color-border-subtle);
     border-radius: var(--radius-2xl);
     overflow: hidden;
-    transition: var(--transition-all);
+    box-shadow: var(--shadow-card);
   }
 
   @media (min-width: 1024px) {
-    .carousel-slide {
-      /* Show 1 full slide + peek at the next one */
-      flex: 0 0 calc(85% - var(--space-6));
+    .carousel-content {
       flex-direction: row;
       align-items: stretch;
     }
   }
 
-  .carousel-slide:hover {
-    border-color: rgba(51, 65, 85, 0.8);
-    box-shadow: var(--shadow-hover);
-    transform: translateY(-4px);
-  }
-
-  .slide-image-wrapper {
-    flex: 1;
-    background-color: var(--color-bg-base);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
+  /* ── Image Viewport ── */
+  .image-viewport {
     position: relative;
-    min-height: 280px;
-    border-bottom: var(--border-thin) solid var(--color-border-subtle);
+    width: 100%;
+    min-height: 300px;
+    overflow: hidden; /* Strict mask to prevent sliding image from escaping */
+    background-color: var(--color-bg-base);
   }
 
   @media (min-width: 1024px) {
-    .slide-image-wrapper {
-      min-height: 440px;
-      border-bottom: none;
+    .image-viewport {
+      flex: 1 1 55%;
+      min-height: 520px;
       border-right: var(--border-thin) solid var(--color-border-subtle);
     }
   }
+
+  /* Holds individual image, positioned absolute to stack incoming/outgoing */
+  .image-layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Natural DOM order: newer element is appended last, so it has higher z-index automatically */
 
   .slide-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+    /* Optional: add a tiny scale to give it some life before/after sliding */
+    transform: scale(1.02);
   }
 
-  .carousel-slide:hover .slide-image {
-    transform: scale(1.05);
-  }
-
-  .slide-content {
-    flex: 1;
+  /* ── Text Viewport (Static) ── */
+  .text-viewport {
+    flex: 1 1 45%;
     padding: var(--space-8);
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: var(--space-5);
+    gap: var(--space-6);
+    background-color: var(--color-bg-surface);
+  }
+
+  @media (min-width: 1024px) {
+    .text-viewport {
+      padding: var(--space-10);
+    }
   }
 
   .slide-meta {
@@ -318,12 +295,5 @@
     font-weight: var(--weight-semibold);
     color: var(--color-text-primary);
     white-space: nowrap;
-    transition: var(--transition-colors);
-  }
-
-  .carousel-slide:hover .slide-tag {
-    background-color: var(--color-accent-glow);
-    border-color: var(--color-accent-glow-border);
-    color: var(--color-accent);
   }
 </style>
