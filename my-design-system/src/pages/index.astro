@@ -4,7 +4,7 @@
 // This file outputs only the slot content.
 import AmbientGlow   from '../components/AmbientGlow.astro';
 import HeroSection   from '../components/HeroSection.astro';
-import WorkCarousel  from '../components/WorkCarousel.svelte';
+import MorphCarousel from '../components/MorphCarousel.svelte';
 import AboutSection  from '../components/AboutSection.astro';
 import CtaBanner     from '../components/CtaBanner.astro';
 import Layout        from '../layouts/Layout.astro';
@@ -16,7 +16,7 @@ const projects = MockRepository.getProjects();
 <Layout>
   <AmbientGlow />
   <HeroSection />
-  <WorkCarousel client:load projects={projects} />
+  <MorphCarousel client:load projects={projects} />
   <AboutSection />
   <CtaBanner />
 </Layout>
