@@ -54,12 +54,12 @@ const imgArrow = 'http://localhost:3845/assets/d20c3b1b4e24cb127394aa7b9f0033015
   }
 
   .cta__heading {
-    font-family: 'Segoe UI', sans-serif;
-    font-size: 48px;
-    font-weight: 700;
-    line-height: 48px;
-    letter-spacing: -1.2px;
-    color: #f8fafc;
+    font-family: var(--font-ui);
+    font-size: var(--text-4xl);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-heading);
+    letter-spacing: var(--tracking-heading);
+    color: var(--color-text-primary);
     text-align: center;
     margin: 0;
     white-space: nowrap;
@@ -67,10 +67,10 @@ const imgArrow = 'http://localhost:3845/assets/d20c3b1b4e24cb127394aa7b9f0033015
 
   /* ── Subtitle ── */
   .cta__subtitle {
-    font-family: 'Segoe UI Emoji', 'Segoe UI', sans-serif;
-    font-size: 16px;
-    line-height: 24px;
-    color: #94a3b8;
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+    color: var(--color-text-secondary);
     text-align: center;
     max-width: 497px;
     margin: 0;
@@ -84,11 +84,11 @@ const imgArrow = 'http://localhost:3845/assets/d20c3b1b4e24cb127394aa7b9f0033015
     width: 448px;
     height: 100px;
     padding-inline: 24px;
-    border-radius: 16px;
-    background: linear-gradient(90deg, #2563eb 0%, #3b82f6 100%);
+    border-radius: var(--radius-xl);
+    background: var(--gradient-cta-card);
     text-decoration: none;
     flex-shrink: 0;
-    transition: opacity 0.15s ease, transform 0.1s ease;
+    transition: var(--transition-opacity), var(--transition-transform);
   }
   .cta__card:hover { opacity: 0.92; }
   .cta__card:active { transform: scale(0.98); }
@@ -100,20 +100,20 @@ const imgArrow = 'http://localhost:3845/assets/d20c3b1b4e24cb127394aa7b9f0033015
   }
 
   .cta__card-title {
-    font-family: 'Segoe UI', sans-serif;
-    font-size: 20px;
-    font-weight: 700;
-    line-height: 28px;
-    color: #f8fafc;
+    font-family: var(--font-ui);
+    font-size: var(--text-xl);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-primary);
     margin: 0;
     white-space: nowrap;
   }
 
   .cta__card-sub {
-    font-family: 'Segoe UI Emoji', 'Segoe UI', sans-serif;
-    font-size: 14px;
-    line-height: 20px;
-    color: #c6d2ff;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    line-height: var(--leading-snug);
+    color: var(--color-cta-sublabel);
     margin: 0;
     white-space: nowrap;
   }
@@ -121,7 +121,7 @@ const imgArrow = 'http://localhost:3845/assets/d20c3b1b4e24cb127394aa7b9f0033015
   .cta__card-icon-wrap {
     width: 48px;
     height: 48px;
-    border-radius: 9999px;
+    border-radius: var(--radius-full);
     background-color: rgba(248, 250, 252, 0.2);
     display: flex;
     align-items: center;

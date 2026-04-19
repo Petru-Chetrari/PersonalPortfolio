@@ -624,7 +624,7 @@
 <style>
   /* ── Field label ── */
   .field-label {
-    color: #3b82f6;
+    color: var(--color-accent);
     font-size: 11px;
     font-weight: 800;
     letter-spacing: 0.1em;
@@ -637,11 +637,11 @@
   .edit-input,
   .edit-textarea {
     width: 100%;
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 10px;
-    color: #f8fafc;
-    font-size: 14px;
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    font-size: var(--text-sm);
     font-weight: 500;
     padding: 10px 14px;
     outline: none;
@@ -655,13 +655,13 @@
 
   .edit-input:focus,
   .edit-textarea:focus {
-    border-color: #3b82f6;
+    border-color: var(--color-accent);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
   }
 
   .edit-input::placeholder,
   .edit-textarea::placeholder {
-    color: #475569;
+    color: var(--color-border-muted);
   }
 
   /* ── Validation error state ── */
@@ -717,6 +717,6 @@
   }
   .sidebar-scroll:hover::-webkit-scrollbar-thumb,
   .detail-scroll:hover::-webkit-scrollbar-thumb {
-    background: #334155;
+    background: var(--color-border);
   }
 </style>

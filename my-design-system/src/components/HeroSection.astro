@@ -64,13 +64,13 @@
     height: 33.6px;
     padding-inline: 16px;
     border-radius: 9999px;
-    background-color: #1e293b;
-    border: 0.8px solid #334155;
-    font-family: 'Segoe UI', sans-serif;
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 20px;
-    color: #cbd5e1;
+    background-color: var(--color-bg-surface);
+    border: var(--border-thin) solid var(--color-border);
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-normal);
+    line-height: var(--leading-snug);
+    color: var(--color-text-muted);
     white-space: nowrap;
   }
 
@@ -78,7 +78,7 @@
     width: 8px;
     height: 8px;
     border-radius: 9999px;
-    background-color: #00bc7d;
+    background-color: var(--color-success);
     opacity: 0.63;
     flex-shrink: 0;
     animation: badge-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
@@ -98,18 +98,18 @@
   }
 
   .hero__headline {
-    font-family: 'Segoe UI', sans-serif;
+    font-family: var(--font-ui);
     font-size: clamp(40px, 6.5vw, 72px);
-    font-weight: 900;
+    font-weight: var(--weight-black);
     line-height: 90px;
-    letter-spacing: -3.6px;
-    color: #f8fafc;
+    letter-spacing: var(--tracking-hero);
+    color: var(--color-text-primary);
     margin: 0;
     white-space: nowrap;
   }
 
   .hero__headline-accent {
-    background-image: linear-gradient(90deg, #60a5fa 0%, #00d3f3 100%);
+    background-image: var(--gradient-hero-accent);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -117,22 +117,22 @@
   }
 
   .hero__headline-line2 {
-    font-family: 'Segoe UI', sans-serif;
+    font-family: var(--font-ui);
     font-size: clamp(40px, 6.5vw, 72px);
-    font-weight: 900;
+    font-weight: var(--weight-black);
     line-height: 90px;
-    letter-spacing: -3.6px;
-    color: #f8fafc;
+    letter-spacing: var(--tracking-hero);
+    color: var(--color-text-primary);
     margin: 0;
     white-space: nowrap;
   }
 
   /* ── Subtitle ── */
   .hero__subtitle {
-    font-family: 'Segoe UI Emoji', 'Segoe UI', sans-serif;
-    font-size: 20px;
-    line-height: 28px;
-    color: #94a3b8;
+    font-family: var(--font-body);
+    font-size: var(--text-xl);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-secondary);
     max-width: 660px;
     margin: 0;
   }
@@ -152,27 +152,27 @@
     align-items: center;
     gap: 10px;
     padding: 12px 24px;
-    border-radius: 9999px;
-    font-family: 'Segoe UI', sans-serif;
-    font-size: 16px;
-    font-weight: 600;
-    line-height: 24px;
+    border-radius: var(--radius-full);
+    font-family: var(--font-ui);
+    font-size: var(--text-base);
+    font-weight: var(--weight-semibold);
+    line-height: var(--leading-normal);
     text-decoration: none;
     white-space: nowrap;
-    transition: opacity 0.15s ease, transform 0.1s ease;
+    transition: var(--transition-opacity), var(--transition-transform);
   }
   .hero__cta:active { transform: scale(0.97); }
 
   .hero__cta--primary {
-    background-color: #f8fafc;
+    background-color: var(--color-text-primary);
     color: #000;
   }
   .hero__cta--primary:hover { opacity: 0.9; }
 
   .hero__cta--secondary {
-    background-color: #1e293b;
-    border: 0.8px solid #334155;
-    color: #f8fafc;
+    background-color: var(--color-bg-surface);
+    border: var(--border-thin) solid var(--color-border);
+    color: var(--color-text-primary);
   }
   .hero__cta--secondary:hover { opacity: 0.85; }
 

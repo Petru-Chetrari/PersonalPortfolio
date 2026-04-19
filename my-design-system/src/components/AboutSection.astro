@@ -77,9 +77,9 @@ const imgDownload = 'http://localhost:3845/assets/46fefa6064db1881ae2db34679ef84
   /* ── Card ── */
   .about__card {
     position: relative;
-    background-color: #1e293b;
-    border: 0.8px solid #334155;
-    border-radius: 48px;
+    background-color: var(--color-bg-surface);
+    border: var(--border-thin) solid var(--color-border);
+    border-radius: var(--radius-3xl);
     overflow: hidden;
     height: 613.6px;
   }
@@ -87,7 +87,7 @@ const imgDownload = 'http://localhost:3845/assets/46fefa6064db1881ae2db34679ef84
   /* ── Ambient glows ── */
   .about__glow {
     position: absolute;
-    border-radius: 9999px;
+    border-radius: var(--radius-full);
     pointer-events: none;
   }
   .about__glow--blue {
@@ -95,7 +95,7 @@ const imgDownload = 'http://localhost:3845/assets/46fefa6064db1881ae2db34679ef84
     height: 500px;
     top: -250px;
     left: 844.4px;
-    background-color: rgba(59, 130, 246, 0.1);
+    background-color: var(--color-glow-blue);
     filter: blur(120px);
   }
   .about__glow--teal {
@@ -103,7 +103,7 @@ const imgDownload = 'http://localhost:3845/assets/46fefa6064db1881ae2db34679ef84
     height: 500px;
     top: 362px;
     left: -250px;
-    background-color: rgba(0, 184, 219, 0.1);
+    background-color: var(--color-glow-teal);
     filter: blur(120px);
   }
 
@@ -128,12 +128,12 @@ const imgDownload = 'http://localhost:3845/assets/46fefa6064db1881ae2db34679ef84
   }
 
   .about__heading {
-    font-family: 'Segoe UI', sans-serif;
-    font-size: 48px;
-    font-weight: 700;
-    line-height: 48px;
-    letter-spacing: -1.2px;
-    color: #f8fafc;
+    font-family: var(--font-ui);
+    font-size: var(--text-4xl);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-heading);
+    letter-spacing: var(--tracking-heading);
+    color: var(--color-text-primary);
     margin: 0 0 0 0;
     white-space: nowrap;
   }
@@ -149,10 +149,10 @@ const imgDownload = 'http://localhost:3845/assets/46fefa6064db1881ae2db34679ef84
   }
 
   .about__para {
-    font-family: 'Segoe UI Emoji', 'Segoe UI', sans-serif;
-    font-size: 18px;
-    line-height: 28px;
-    color: #94a3b8;
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-secondary);
     margin: 0;
     max-width: 448px;
   }
@@ -171,21 +171,21 @@ const imgDownload = 'http://localhost:3845/assets/46fefa6064db1881ae2db34679ef84
     display: inline-flex;
     align-items: center;
     height: 48px;
-    border-radius: 9999px;
+    border-radius: var(--radius-full);
     background-color: rgba(51, 65, 85, 0.8);
     text-decoration: none;
-    transition: opacity 0.15s ease;
+    transition: var(--transition-opacity);
   }
   .about__link:hover { opacity: 0.8; }
 
   .about__link--wide {
     gap: 8px;
     padding: 0 24px 0 24px;
-    font-family: 'Segoe UI', sans-serif;
-    font-size: 16px;
-    font-weight: 600;
-    line-height: 24px;
-    color: #f8fafc;
+    font-family: var(--font-ui);
+    font-size: var(--text-base);
+    font-weight: var(--weight-semibold);
+    line-height: var(--leading-normal);
+    color: var(--color-text-primary);
     white-space: nowrap;
   }
 
@@ -204,9 +204,9 @@ const imgDownload = 'http://localhost:3845/assets/46fefa6064db1881ae2db34679ef84
   .about__photo-wrap {
     width: 451.2px;
     height: 451.2px;
-    border-radius: 16px;
+    border-radius: var(--radius-xl);
     overflow: hidden;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    box-shadow: var(--shadow-photo);
     flex-shrink: 0;
     margin-top: 16.4px;
   }

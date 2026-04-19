@@ -354,25 +354,25 @@
   }
 
   .sc-heading {
-    font-family: 'Segoe UI', sans-serif;
-    font-size: 48px;
-    font-weight: 700;
-    line-height: 48px;
-    letter-spacing: -1.2px;
-    color: #f8fafc;
+    font-family: var(--font-ui);
+    font-size: var(--text-4xl);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-heading);
+    letter-spacing: var(--tracking-heading);
+    color: var(--color-text-primary);
     margin: 0;
     white-space: nowrap;
   }
 
   .sc-heading-accent {
-    color: #3b82f6;
+    color: var(--color-accent);
   }
 
   .sc-subtitle {
-    font-family: 'Segoe UI Emoji', 'Segoe UI', sans-serif;
-    font-size: 16px;
-    line-height: 24px;
-    color: #94a3b8;
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+    color: var(--color-text-secondary);
     max-width: 645px;
     margin: 0;
   }
@@ -396,11 +396,11 @@
   }
 
   .sc-services-title {
-    font-family: 'Segoe UI', sans-serif;
-    font-size: 20px;
-    font-weight: 700;
-    line-height: 28px;
-    color: #f8fafc;
+    font-family: var(--font-ui);
+    font-size: var(--text-xl);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-primary);
     margin: 0;
     white-space: nowrap;
   }
@@ -426,8 +426,8 @@
     position: relative;
     width: 44px;
     height: 44px;
-    background-color: #1e293b;
-    border-radius: 10px;
+    background-color: var(--color-bg-surface);
+    border-radius: var(--radius-md);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -449,27 +449,27 @@
   }
 
   .sc-service-name {
-    font-family: 'Segoe UI', sans-serif;
-    font-size: 16px;
-    font-weight: 600;
-    line-height: 24px;
-    color: #f8fafc;
+    font-family: var(--font-ui);
+    font-size: var(--text-base);
+    font-weight: var(--weight-semibold);
+    line-height: var(--leading-normal);
+    color: var(--color-text-primary);
     white-space: nowrap;
   }
 
   .sc-service-desc {
-    font-family: 'Segoe UI Emoji', 'Segoe UI', sans-serif;
-    font-size: 14px;
-    line-height: 20px;
-    color: #94a3b8;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    line-height: var(--leading-snug);
+    color: var(--color-text-secondary);
     max-width: 166px;
   }
 
   /* ── Right: Form card ────────────────────────────────────────────── */
   .sc-card {
-    background-color: #1e293b;
-    border: 0.8px solid #334155;
-    border-radius: 24px;
+    background-color: var(--color-bg-surface);
+    border: var(--border-thin) solid var(--color-border);
+    border-radius: var(--radius-2xl);
     box-shadow:
       0px 20px 25px 0px rgba(0, 0, 0, 0.5),
       0px 8px 10px 0px rgba(0, 0, 0, 0.5);
@@ -506,11 +506,11 @@
 
   /* ── Label ───────────────────────────────────────────────────────── */
   .sc-label {
-    font-family: 'Segoe UI', sans-serif;
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 20px;
-    color: #94a3b8;
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-normal);
+    line-height: var(--leading-snug);
+    color: var(--color-text-secondary);
   }
 
   .sc-required {
@@ -522,21 +522,21 @@
   .sc-input {
     width: 100%;
     height: 49.6px;
-    background-color: #0f172a;
-    border: 0.8px solid #334155;
-    border-radius: 14px;
+    background-color: var(--color-bg-base);
+    border: var(--border-thin) solid var(--color-border);
+    border-radius: var(--radius-lg);
     padding: 12px 16px;
-    font-family: 'Segoe UI Emoji', 'Segoe UI', sans-serif;
-    font-size: 16px;
+    font-family: var(--font-body);
+    font-size: var(--text-base);
     line-height: normal;
-    color: #f8fafc;
+    color: var(--color-text-primary);
     outline: none;
     transition: border-color 0.15s ease;
     box-sizing: border-box;
   }
-  .sc-input::placeholder { color: #64748b; }
+  .sc-input::placeholder { color: var(--color-text-placeholder); }
   .sc-input:focus,
-  .sc-input--focused    { border-color: #3b82f6; }
+  .sc-input--focused    { border-color: var(--color-accent); }
   .sc-input--error      { border-color: #ef4444 !important; }
 
   /* Input with currency prefix */
@@ -549,9 +549,9 @@
   .sc-currency {
     position: absolute;
     left: 16px;
-    font-family: 'Segoe UI Emoji', 'Segoe UI', sans-serif;
-    font-size: 16px;
-    color: #64748b;
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    color: var(--color-text-placeholder);
     pointer-events: none;
     z-index: 1;
   }
@@ -571,22 +571,22 @@
     width: 100%;
     height: 49.6px;
     appearance: none;
-    background-color: #0f172a;
-    border: 0.8px solid #334155;
-    border-radius: 14px;
+    background-color: var(--color-bg-base);
+    border: var(--border-thin) solid var(--color-border);
+    border-radius: var(--radius-lg);
     padding: 12px 40px 12px 16px;
-    font-family: 'Segoe UI Emoji', 'Segoe UI', sans-serif;
-    font-size: 16px;
-    color: #f8fafc;
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    color: var(--color-text-primary);
     outline: none;
     cursor: pointer;
     transition: border-color 0.15s ease;
     box-sizing: border-box;
   }
   .sc-select:focus,
-  .sc-select--focused { border-color: #3b82f6; }
+  .sc-select--focused { border-color: var(--color-accent); }
   .sc-select--error   { border-color: #ef4444 !important; }
-  .sc-select option   { background-color: #1e293b; color: #f8fafc; }
+  .sc-select option   { background-color: var(--color-bg-surface); color: var(--color-text-primary); }
 
   .sc-select-arrow {
     position: absolute;
@@ -598,28 +598,28 @@
   .sc-textarea {
     width: 100%;
     height: 145.6px;
-    background-color: #0f172a;
-    border: 0.8px solid #334155;
-    border-radius: 14px;
+    background-color: var(--color-bg-base);
+    border: var(--border-thin) solid var(--color-border);
+    border-radius: var(--radius-lg);
     padding: 12px 16px;
-    font-family: 'Segoe UI Emoji', 'Segoe UI', sans-serif;
-    font-size: 16px;
-    line-height: 24px;
-    color: #f8fafc;
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+    color: var(--color-text-primary);
     outline: none;
     resize: vertical;
     transition: border-color 0.15s ease;
     box-sizing: border-box;
   }
-  .sc-textarea::placeholder { color: #64748b; }
+  .sc-textarea::placeholder { color: var(--color-text-placeholder); }
   .sc-textarea:focus,
-  .sc-textarea--focused      { border-color: #3b82f6; }
+  .sc-textarea--focused      { border-color: var(--color-accent); }
   .sc-textarea--error        { border-color: #ef4444 !important; }
 
   /* ── Error message ───────────────────────────────────────────────── */
   .sc-error-msg {
-    font-family: 'Segoe UI Emoji', 'Segoe UI', sans-serif;
-    font-size: 12px;
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
     line-height: 16px;
     color: #f87171;
     margin-top: 2px;
@@ -633,14 +633,14 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
-    background-color: #2563eb;
+    background-color: var(--color-accent-dark);
     border: none;
-    border-radius: 14px;
-    font-family: 'Segoe UI', sans-serif;
-    font-size: 16px;
-    font-weight: 600;
-    line-height: 24px;
-    color: #f8fafc;
+    border-radius: var(--radius-lg);
+    font-family: var(--font-ui);
+    font-size: var(--text-base);
+    font-weight: var(--weight-semibold);
+    line-height: var(--leading-normal);
+    color: var(--color-text-primary);
     cursor: pointer;
     transition: background-color 0.15s ease, opacity 0.15s ease, transform 0.1s ease;
   }
@@ -670,7 +670,7 @@
   .sc-success-icon-wrap {
     width: 64px;
     height: 64px;
-    border-radius: 9999px;
+    border-radius: var(--radius-full);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -679,35 +679,35 @@
   }
 
   .sc-success-heading {
-    font-family: 'Segoe UI', sans-serif;
+    font-family: var(--font-ui);
     font-size: 22px;
-    font-weight: 700;
-    color: #f8fafc;
+    font-weight: var(--weight-bold);
+    color: var(--color-text-primary);
     margin: 0;
   }
 
   .sc-success-sub {
-    font-family: 'Segoe UI Emoji', 'Segoe UI', sans-serif;
+    font-family: var(--font-body);
     font-size: 15px;
-    line-height: 24px;
-    color: #94a3b8;
+    line-height: var(--leading-normal);
+    color: var(--color-text-secondary);
     margin: 4px 0 0;
   }
 
   .sc-btn-secondary {
     margin-top: 8px;
     padding: 10px 20px;
-    border-radius: 14px;
-    background-color: #1e293b;
-    border: 0.8px solid #334155;
-    font-family: 'Segoe UI', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    color: #cbd5e1;
+    border-radius: var(--radius-lg);
+    background-color: var(--color-bg-surface);
+    border: var(--border-thin) solid var(--color-border);
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-muted);
     cursor: pointer;
     transition: background-color 0.15s ease;
   }
-  .sc-btn-secondary:hover { background-color: #334155; }
+  .sc-btn-secondary:hover { background-color: var(--color-bg-elevated); }
 
   /* ── Responsive ──────────────────────────────────────────────────── */
   @media (max-width: 768px) {

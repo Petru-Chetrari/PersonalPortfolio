@@ -1,1 +1,142 @@
 @import "tailwindcss";
+
+/* ============================================================
+   DESIGN SYSTEM — CSS Custom Properties
+   Source of truth for all theme-level values across the app.
+   Consumed by all .astro and .svelte components via var().
+   ============================================================ */
+
+:root {
+  /* ── Color Palette ─────────────────────────────────────── */
+
+  /* Backgrounds (dark-first palette, Figma verified) */
+  --color-bg-base:       #0f172a;  /* slate-900: page body, deepest panels */
+  --color-bg-surface:    #1e293b;  /* slate-800: cards, nav, headers */
+  --color-bg-elevated:   #334155;  /* slate-700: active items, count badges */
+  --color-bg-overlay:    rgba(30, 41, 59, 0.5);  /* translucent surface */
+
+  /* Borders */
+  --color-border:        #334155;              /* slate-700: standard border */
+  --color-border-subtle: rgba(51, 65, 85, 0.5); /* dimmed variant for cards */
+  --color-border-muted:  #475569;              /* slate-600: avatar, active items */
+
+  /* Text */
+  --color-text-primary:     #f8fafc;  /* slate-50: headings, primary copy */
+  --color-text-secondary:   #94a3b8;  /* slate-400: subtitles, nav links */
+  --color-text-muted:       #cbd5e1;  /* slate-300: item titles, badge text */
+  --color-text-placeholder: #64748b;  /* slate-500: input placeholders */
+
+  /* Brand / Accent (blue) */
+  --color-accent:          #3b82f6;              /* blue-500: links, buttons, avatars */
+  --color-accent-dark:     #2563eb;              /* blue-600: CTA gradient start */
+  --color-accent-glow:     rgba(59, 130, 246, 0.1);  /* soft blue glow */
+  --color-accent-glow-border: rgba(59, 130, 246, 0.2);
+  --color-accent-subtle:   rgba(59, 130, 246, 0.2);  /* button hover bg */
+
+  /* Semantic / Status */
+  --color-success:         #00bc7d;              /* green: completed, badge dot */
+  --color-success-bg:      rgba(0, 188, 125, 0.1);
+  --color-success-border:  rgba(0, 188, 125, 0.2);
+
+  --color-warning:         #FFB900;              /* amber: in-progress status */
+  --color-warning-bg:      rgba(254, 154, 0, 0.1);
+  --color-warning-border:  rgba(254, 154, 0, 0.2);
+
+  --color-error:           #FF2056;              /* red: overdue status */
+  --color-error-bg:        rgba(255, 32, 86, 0.1);
+  --color-error-border:    rgba(255, 32, 86, 0.2);
+
+  /* Gradient */
+  --gradient-hero-accent: linear-gradient(90deg, #60a5fa 0%, #00d3f3 100%);
+  --gradient-cta-card:    linear-gradient(90deg, var(--color-accent-dark) 0%, var(--color-accent) 100%);
+
+  /* Ambient Glow Colors (About section) */
+  --color-glow-blue: rgba(59, 130, 246, 0.1);
+  --color-glow-teal: rgba(0, 184, 219, 0.1);
+
+  /* CTA sub-label color (slightly lighter than primary on blue bg) */
+  --color-cta-sublabel: #c6d2ff;
+
+  /* ── Typography ────────────────────────────────────────── */
+
+  --font-ui:   'Segoe UI', sans-serif;
+  --font-body: 'Segoe UI Emoji', 'Segoe UI', sans-serif;
+  --font-mono: 'Consolas', 'Courier New', monospace;
+
+  /* Type Scale */
+  --text-xs:   12px;
+  --text-sm:   14px;
+  --text-base: 16px;
+  --text-lg:   18px;
+  --text-xl:   20px;
+  --text-2xl:  24px;
+  --text-3xl:  30px;
+  --text-4xl:  48px;
+
+  /* Line Heights */
+  --leading-tight:  1.1;
+  --leading-snug:   20px;  /* 14px text */
+  --leading-normal: 24px;  /* 16px text */
+  --leading-relaxed:28px;  /* 18–20px text */
+  --leading-heading:48px;  /* h2 headings */
+
+  /* Letter Spacing */
+  --tracking-heading: -1.2px;
+  --tracking-hero:    -3.6px;
+  --tracking-label:    0.6px;
+  --tracking-badge:    0.7px;
+
+  /* Font Weights */
+  --weight-normal:    400;
+  --weight-semibold:  600;
+  --weight-bold:      700;
+  --weight-black:     900;
+
+  /* ── Spacing Scale ──────────────────────────────────────── */
+
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:   12px;
+  --space-4:   16px;
+  --space-5:   20px;
+  --space-6:   24px;
+  --space-8:   32px;
+  --space-10:  40px;
+  --space-12:  48px;
+  --space-16:  64px;
+
+  /* ── Border Radius ─────────────────────────────────────── */
+
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   14px;
+  --radius-xl:   16px;
+  --radius-2xl:  24px;
+  --radius-3xl:  48px;
+  --radius-full: 9999px;
+
+  /* ── Shadows ───────────────────────────────────────────── */
+
+  --shadow-card:   0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --shadow-photo:  0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  --shadow-header: 0 4px 30px rgba(0, 0, 0, 0.1);
+  --shadow-hover:  0 8px 32px rgba(0, 0, 0, 0.3);
+  --shadow-sm:     0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.1);
+
+  /* ── Transitions ───────────────────────────────────────── */
+
+  --transition-colors: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+  --transition-opacity: opacity 0.15s ease;
+  --transition-transform: transform 0.1s ease;
+  --transition-all:    all 0.2s ease;
+  --transition-header: all 0.3s ease;
+
+  /* ── Border Widths ─────────────────────────────────────── */
+
+  --border-thin: 0.8px;
+
+  /* ── Z-Index Scale ─────────────────────────────────────── */
+
+  --z-base:    10;
+  --z-overlay: 50;
+}
