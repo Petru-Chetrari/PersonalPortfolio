@@ -9,6 +9,9 @@ export default defineConfig({
   integrations: [svelte()],
 
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss()],
+    ssr: {
+      noExternal: ['svelte-chartjs', 'chart.js']
+    }
   }
 });

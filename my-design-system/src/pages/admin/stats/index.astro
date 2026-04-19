@@ -1,10 +1,18 @@
 ---
 import AdminDashboard from '../../../layouts/AdminDashboard.astro';
+import Chart from '../../../components/Chart.svelte';
 ---
 
 <AdminDashboard>
-  <div id="admin-stats" class="p-2 flex flex-col gap-6">
+  <div id="admin-stats" class="p-4 flex flex-col gap-8 max-w-6xl mx-auto">
     
+    <div class="flex items-center justify-between">
+        <h2 class="text-2xl font-bold text-slate-50 font-['Segoe_UI',sans-serif] tracking-tight">Analytics Dashboard</h2>
+        <a href="/admin/stats/table" class="px-4 py-2 rounded-xl text-sm font-semibold text-slate-300 transition-all hover:bg-slate-700 font-['Segoe_UI',sans-serif]" style="background-color: #1E293B; border: 1px solid #334155;">
+            View Detailed Table
+        </a>
+    </div>
+
     <!-- KPI Cards Row -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <!-- Card: Total Commissions -->
@@ -19,8 +27,8 @@ import AdminDashboard from '../../../layouts/AdminDashboard.astro';
           </div>
         </div>
         <div>
-          <p class="text-4xl font-bold text-slate-50 font-['Segoe_UI',sans-serif]" id="stat-total">24</p>
-          <p class="text-xs text-slate-400 mt-1 font-['Segoe_UI_Emoji',sans-serif]">+3 this month</p>
+          <p class="text-4xl font-bold text-slate-50 font-['Segoe_UI',sans-serif]" id="stat-total">0</p>
+          <p class="text-xs text-slate-400 mt-1 font-['Segoe_UI_Emoji',sans-serif]">All time</p>
         </div>
       </div>
 
@@ -36,7 +44,7 @@ import AdminDashboard from '../../../layouts/AdminDashboard.astro';
           </div>
         </div>
         <div>
-          <p class="text-4xl font-bold text-slate-50 font-['Segoe_UI',sans-serif]" id="stat-active">8</p>
+          <p class="text-4xl font-bold text-slate-50 font-['Segoe_UI',sans-serif]" id="stat-active">0</p>
           <p class="text-xs text-slate-400 mt-1 font-['Segoe_UI_Emoji',sans-serif]">Currently in progress</p>
         </div>
       </div>
@@ -52,65 +60,54 @@ import AdminDashboard from '../../../layouts/AdminDashboard.astro';
           </div>
         </div>
         <div>
-          <p class="text-4xl font-bold text-slate-50 font-['Segoe_UI',sans-serif]" id="stat-revenue">$9,580</p>
-          <p class="text-xs text-slate-400 mt-1 font-['Segoe_UI_Emoji',sans-serif]">From 12 completed</p>
+          <p class="text-4xl font-bold text-slate-50 font-['Segoe_UI',sans-serif]" id="stat-revenue">$0</p>
+          <p class="text-xs text-slate-400 mt-1 font-['Segoe_UI_Emoji',sans-serif]">From completed</p>
         </div>
       </div>
     </div>
 
-    <!-- Bar Chart Section -->
-    <div class="rounded-2xl p-6 flex flex-col gap-5" style="background-color: #0F172A; border: 1px solid #334155;">
-      <div class="flex items-center justify-between flex-wrap gap-3">
+    <!-- Interaction Trends Chart -->
+    <section class="rounded-2xl p-6 flex flex-col gap-4 shadow-xl" style="background-color: #0F172A; border: 1px solid #1E293B;">
+      <div class="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h3 class="text-base font-bold text-slate-50 font-['Segoe_UI',sans-serif]">Commissions by Month</h3>
-          <p class="text-xs text-slate-400 mt-0.5 font-['Segoe_UI_Emoji',sans-serif]">Last 6 months overview</p>
+          <h3 class="text-lg font-bold text-slate-50 font-['Segoe_UI',sans-serif]">Interaction Trends</h3>
+          <p class="text-sm text-slate-400 font-['Segoe_UI_Emoji',sans-serif]">Click-throughs over time</p>
         </div>
-        <a href="/admin/stats/table" class="text-xs text-blue-400 hover:text-blue-300 transition-colors font-['Segoe_UI',sans-serif] flex items-center gap-1">
-          View table
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
-            <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-        </a>
-      </div>
-
-      <!-- Chart -->
-      <div class="relative h-52 flex items-end gap-3" id="bar-chart" aria-label="Monthly commissions bar chart">
-        <!-- Gridlines -->
-        <div class="absolute inset-0 flex flex-col justify-between pointer-events-none pb-6">
-          {[5, 4, 3, 2, 1].map((_, i) => (
-            <div class="w-full border-t border-dashed" style="border-color: #262626;"></div>
-          ))}
-        </div>
-
-        <!-- Bars (rendered by JS) -->
-        <div id="bars-container" class="relative z-10 flex items-end gap-3 w-full h-full pb-6">
+        <div class="flex gap-5 text-sm font-semibold text-slate-300 font-['Segoe_UI',sans-serif]">
+           <span class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-md bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]"></span>Projects</span>
+           <span class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-md bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.6)]"></span>Links</span>
         </div>
       </div>
-    </div>
+      
+      <!-- Wrapper for Chart.js instance. Height is handled by Chart.svelte -->
+      <Chart client:visible />
+    </section>
 
     <!-- Recent Activity Table -->
-    <div class="rounded-2xl overflow-hidden" style="background-color: #0F172A; border: 1px solid #334155;">
-      <div class="px-6 py-4 border-b" style="border-color: #1E293B;">
-        <h3 class="text-base font-bold text-slate-50 font-['Segoe_UI',sans-serif]">Recent Activity</h3>
+    <div class="rounded-2xl overflow-hidden shadow-xl" style="background-color: #0F172A; border: 1px solid #1E293B;">
+      <div class="px-6 py-5 border-b" style="border-color: #1E293B;">
+        <h3 class="text-lg font-bold text-slate-50 font-['Segoe_UI',sans-serif]">Recent Commissions</h3>
       </div>
+      <div class="overflow-x-auto">
       <table class="w-full text-sm">
         <thead>
           <tr class="text-left" style="background-color: #111827;">
-            <th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider font-['Segoe_UI',sans-serif]">Commission</th>
-            <th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider font-['Segoe_UI',sans-serif] hidden md:table-cell">Client</th>
-            <th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider font-['Segoe_UI',sans-serif] hidden md:table-cell">Date</th>
-            <th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider font-['Segoe_UI',sans-serif]">Status</th>
+            <th class="px-6 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wider font-['Segoe_UI',sans-serif]">Commission</th>
+            <th class="px-6 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wider font-['Segoe_UI',sans-serif] hidden md:table-cell">Client</th>
+            <th class="px-6 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wider font-['Segoe_UI',sans-serif] hidden md:table-cell">Date</th>
+            <th class="px-6 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wider font-['Segoe_UI',sans-serif]">Status</th>
           </tr>
         </thead>
         <tbody id="recent-table-body">
         </tbody>
       </table>
+      </div>
     </div>
 
   </div>
 
   <script>
-    import { MockRepository } from '../../../lib/mock-repository';
+    import { MockRepository } from '../../../lib/mock-repository.svelte.ts';
 
     function initStats() {
       const stats = MockRepository.getAdminStats();
@@ -124,47 +121,26 @@ import AdminDashboard from '../../../layouts/AdminDashboard.astro';
       if (statActive) statActive.textContent = stats.active.toString();
       if (statRevenue) statRevenue.textContent = '$' + stats.revenue.toLocaleString();
 
-      // Update Bar Chart
-      const barsContainer = document.getElementById('bars-container');
-      if (barsContainer) {
-        const maxVal = Math.max(...stats.chartData.map((d: any) => d.value), 10); // Ensure maxVal is at least 10 for visual scale
-        barsContainer.innerHTML = stats.chartData.map((d: any, i: number) => {
-          const pct = (d.value / maxVal) * 100;
-          const isLast = i === stats.chartData.length - 1;
-          return `
-            <div class="flex-1 flex flex-col items-center gap-1 h-full justify-end">
-              <span class="text-xs font-semibold font-['Segoe_UI_Emoji',sans-serif]" style="color:${isLast ? '#3B82F6' : '#64748B'}">
-                ${d.value}
-              </span>
-              <div class="w-full rounded-t-lg transition-all duration-500 ease-out" 
-                style="height:${pct}%; background-color:${isLast ? '#3B82F6' : '#1E293B'}; border-top: 2px solid ${isLast ? '#60A5FA' : '#334155'};">
-              </div>
-              <span class="text-xs text-slate-500 font-['Segoe_UI_Emoji',sans-serif]">${d.month}</span>
-            </div>
-          `;
-        }).join('');
-      }
-
       // Update Recent Activity Table
       const tbody = document.getElementById('recent-table-body');
       if (tbody) {
         const statusConfig: Record<string, {color: string; bg: string}> = {
-          pending:   { color: '#FFB900', bg: 'rgba(255,185,0,0.1)' },
-          active:    { color: '#00BC7D', bg: 'rgba(0,188,125,0.1)' },
-          completed: { color: '#3B82F6', bg: 'rgba(59,130,246,0.1)' },
-          overdue:   { color: '#FF2056', bg: 'rgba(255,32,86,0.1)' },
+          pending:   { color: '#EAB308', bg: 'rgba(234,179,8,0.15)' },
+          active:    { color: '#10B981', bg: 'rgba(16,185,129,0.15)' },
+          completed: { color: '#3B82F6', bg: 'rgba(59,130,246,0.15)' },
+          overdue:   { color: '#EF4444', bg: 'rgba(239,68,68,0.15)' },
         };
 
         tbody.innerHTML = stats.recentActivity.map((r: any, i: number) => {
           const s = statusConfig[r.status];
           return `
-            <tr class="border-t transition-colors duration-100 hover:brightness-125" style="border-color:#1E293B; background-color:${i%2===0?'transparent':'rgba(30,41,59,0.3)'};">
-              <td class="px-6 py-3 text-slate-200 font-medium font-['Segoe_UI',sans-serif] truncate max-w-[200px]">${r.title}</td>
-              <td class="px-6 py-3 text-slate-400 font-['Segoe_UI_Emoji',sans-serif] hidden md:table-cell">${r.client}</td>
-              <td class="px-6 py-3 text-slate-500 text-xs font-['Segoe_UI_Emoji',sans-serif] hidden md:table-cell">${r.date}</td>
-              <td class="px-6 py-3">
-                <span class="px-2.5 py-1 rounded-full text-xs font-semibold font-['Segoe_UI',sans-serif]"
-                  style="background-color:${s.bg}; color:${s.color};">${r.status.charAt(0).toUpperCase() + r.status.slice(1)}</span>
+            <tr class="border-t transition-colors duration-150 hover:bg-slate-800/40" style="border-color:#1E293B;">
+              <td class="px-6 py-4 text-slate-200 font-medium font-['Segoe_UI',sans-serif] truncate max-w-[200px]">${r.title}</td>
+              <td class="px-6 py-4 text-slate-400 font-['Segoe_UI_Emoji',sans-serif] hidden md:table-cell">${r.client}</td>
+              <td class="px-6 py-4 text-slate-500 text-xs font-['Segoe_UI_Emoji',sans-serif] hidden md:table-cell">${r.date}</td>
+              <td class="px-6 py-4">
+                <span class="px-3 py-1.5 rounded-full text-xs font-semibold font-['Segoe_UI',sans-serif]"
+                  style="background-color:${s.bg}; color:${s.color}; border: 1px solid ${s.color}30;">${r.status.charAt(0).toUpperCase() + r.status.slice(1)}</span>
               </td>
             </tr>
           `;

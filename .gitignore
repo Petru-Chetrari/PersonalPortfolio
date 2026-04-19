@@ -23,3 +23,5 @@ my-design-system/npm-debug.log*
 # jetbrains setting folder
 .idea/
 .vscode
+# Added by code-review-graph
+.code-review-graph/

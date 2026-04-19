@@ -1,11 +1,16 @@
 ---
 import Header from '../components/Header.svelte';
 import Footer from '../components/Footer.svelte';
+import GlobalState from '../components/GlobalState.svelte';
 import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
+
+// We get prefs from middleware
+const prefs = Astro.locals.prefs || { theme: 'system', language: 'en', hiringMode: false, reducedMotion: 'system' };
+const themeClass = prefs.theme === 'dark' ? 'dark' : (prefs.theme === 'light' ? 'light' : '');
 ---
 
-<html lang="en">
+<html lang={prefs.language} class={themeClass}>
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -13,8 +18,41 @@ import '../styles/global.css';
 		<meta name="generator" content={Astro.generator} />
 		<title>Astro</title>
 		<ClientRouter />
+
+		<!-- Inline script blocks parsing, applies theme before rendering to avoid flash -->
+		<script is:inline>
+			(function() {
+				var match = document.cookie.match(new RegExp('(^| )user-prefs=([^;]+)'));
+				var theme = 'system';
+				var motion = 'system';
+				if (match) {
+					try {
+						var prefs = JSON.parse(decodeURIComponent(match[2]));
+						if (prefs.theme) theme = prefs.theme;
+						if (prefs.reducedMotion) motion = prefs.reducedMotion;
+					} catch(e) {}
+				}
+
+				var doc = document.documentElement;
+				if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+					doc.classList.add('dark');
+					doc.classList.remove('light');
+				} else {
+					doc.classList.add('light');
+					doc.classList.remove('dark');
+				}
+
+				if (motion === 'true' || (motion === 'system' && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+					doc.setAttribute('data-reduced-motion', 'true');
+				} else {
+					doc.removeAttribute('data-reduced-motion');
+				}
+			})();
+		</script>
 	</head>
 	<body class="bg-slate-900 text-slate-50 min-h-screen flex flex-col items-center">
+		<!-- Hydrate the Svelte store with the SSR provided prefs -->
+		<GlobalState client:load initPrefs={prefs} />
 		<Header client:load />
 		<main class="flex-1 flex flex-col gap-[10px] items-center pt-[100px] pb-[120.8px] w-full max-w-[1144px] relative px-[24px]">
 			<slot />

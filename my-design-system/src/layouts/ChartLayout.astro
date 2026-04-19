@@ -1,0 +1,40 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Chart from '../components/Chart.svelte';
+---
+
+<Layout title="Dashboard">
+  <main class="dashboard-container">
+    <header>
+      <h2>Interaction Statistics</h2>
+      <p>Track user engagement across your portfolio</p>
+    </header>
+    
+
+    <section class="chart-section glass-panel">
+      <div class="custom-legend">
+         <span class="legend-item blue">Projects</span>
+         <span class="legend-item green">Commissions</span>
+         <span class="legend-item yellow">Links</span>
+      </div>
+      
+      <Chart client:visible />
+    </section>
+  </main>
+</Layout>
+
+<style>
+  /* Base styles to match your dark theme */
+  .dashboard-container {
+    background-color: #12151C; /* Main dark background */
+    padding: 2rem;
+    color: white;
+  }
+  .glass-panel {
+    background-color: #1E2330;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+  /* ... legend styling ... */
+</style>

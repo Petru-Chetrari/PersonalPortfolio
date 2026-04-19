@@ -1,0 +1,64 @@
+---
+const stats = [
+  { label: 'Projects completed', value: '30+' },
+  { label: 'Happy clients', value: '24' },
+  { label: 'Years experience', value: '4+' },
+  { label: 'Open commissions', value: '3' },
+];
+---
+
+<section class="stats" aria-label="Key statistics">
+  <div class="stats__grid">
+    {stats.map(({ label, value }) => (
+      <div class="stats__card">
+        <p class="stats__value">{value}</p>
+        <p class="stats__label">{label}</p>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .stats {
+    position: relative;
+    z-index: 10;
+    margin-inline: auto;
+    max-width: 64rem;
+    padding-inline: 1.5rem;
+    margin-bottom: 5rem;
+  }
+
+  .stats__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    .stats__grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  .stats__card {
+    border-radius: 1rem;
+    padding: 1.25rem;
+    text-align: center;
+    background-color: #1E293B;
+    border: 1px solid #334155;
+  }
+
+  .stats__value {
+    font-size: 1.875rem;
+    font-weight: 900;
+    color: #F8FAFC;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  .stats__label {
+    font-size: 0.75rem;
+    color: #94A3B8;
+    margin-top: 0.25rem;
+    font-family: 'Segoe UI Emoji', sans-serif;
+  }
+</style>

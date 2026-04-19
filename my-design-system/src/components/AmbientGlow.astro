@@ -1,0 +1,44 @@
+---
+// Decorative ambient glow — purely visual, pointer-events-none
+---
+
+<div class="glow-root" aria-hidden="true">
+  <div class="glow-blob glow-blob--blue"></div>
+  <div class="glow-blob glow-blob--purple"></div>
+</div>
+
+<style>
+  .glow-root {
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    z-index: 0;
+  }
+
+  .glow-blob {
+    position: absolute;
+    border-radius: 9999px;
+  }
+
+  .glow-blob--blue {
+    top: -10rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 800px;
+    height: 500px;
+    opacity: 0.2;
+    background: radial-gradient(circle, #3B82F6 0%, transparent 70%);
+    filter: blur(80px);
+  }
+
+  .glow-blob--purple {
+    top: 60%;
+    right: -10rem;
+    width: 500px;
+    height: 400px;
+    opacity: 0.1;
+    background: radial-gradient(circle, #8B5CF6 0%, transparent 70%);
+    filter: blur(80px);
+  }
+</style>

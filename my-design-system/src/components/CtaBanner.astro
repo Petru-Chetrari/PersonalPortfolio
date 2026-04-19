@@ -1,0 +1,152 @@
+---
+// CtaBanner.astro — Figma: "Landing > Base > Body > Section[3]"
+// Static CTA section. Centered layout with gradient commission card.
+
+const imgArrow = 'http://localhost:3845/assets/d20c3b1b4e24cb127394aa7b9f0033015d50134f.svg';
+---
+
+<section class="cta" aria-labelledby="cta-heading">
+  <!-- Centered heading -->
+  <div class="cta__heading-wrap">
+    <h2 id="cta-heading" class="cta__heading">Ready to start a project?</h2>
+  </div>
+
+  <!-- Subtitle -->
+  <p class="cta__subtitle">
+    Whether you have a specific project in mind or just want to chat about
+    possibilities, I'm ready to bring your ideas to life.
+  </p>
+
+  <!-- Blue gradient commission card/link -->
+  <a href="/submit-commission" class="cta__card" id="cta-start-commission">
+    <div class="cta__card-copy">
+      <h3 class="cta__card-title">Start a Commission</h3>
+      <p class="cta__card-sub">Fill out a brief form to get started</p>
+    </div>
+    <div class="cta__card-icon-wrap" aria-hidden="true">
+      <img src={imgArrow} alt="" width="24" height="24" class="cta__card-icon" />
+    </div>
+  </a>
+</section>
+
+<style>
+  /* ── Section shell ── */
+  .cta {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+    width: 100%;
+    max-width: 1096px;
+    padding-inline: 260px;
+    margin-inline: auto;
+    box-sizing: border-box;
+  }
+
+  /* ── Heading ── */
+  .cta__heading-wrap {
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .cta__heading {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 48px;
+    letter-spacing: -1.2px;
+    color: #f8fafc;
+    text-align: center;
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  /* ── Subtitle ── */
+  .cta__subtitle {
+    font-family: 'Segoe UI Emoji', 'Segoe UI', sans-serif;
+    font-size: 16px;
+    line-height: 24px;
+    color: #94a3b8;
+    text-align: center;
+    max-width: 497px;
+    margin: 0;
+  }
+
+  /* ── Commission card ── */
+  .cta__card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 448px;
+    height: 100px;
+    padding-inline: 24px;
+    border-radius: 16px;
+    background: linear-gradient(90deg, #2563eb 0%, #3b82f6 100%);
+    text-decoration: none;
+    flex-shrink: 0;
+    transition: opacity 0.15s ease, transform 0.1s ease;
+  }
+  .cta__card:hover { opacity: 0.92; }
+  .cta__card:active { transform: scale(0.98); }
+
+  .cta__card-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .cta__card-title {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 28px;
+    color: #f8fafc;
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  .cta__card-sub {
+    font-family: 'Segoe UI Emoji', 'Segoe UI', sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+    color: #c6d2ff;
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  .cta__card-icon-wrap {
+    width: 48px;
+    height: 48px;
+    border-radius: 9999px;
+    background-color: rgba(248, 250, 252, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .cta__card-icon {
+    width: 24px;
+    height: 24px;
+    display: block;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .cta {
+      padding-inline: 24px;
+    }
+    .cta__heading {
+      font-size: clamp(28px, 5vw, 48px);
+      white-space: normal;
+      text-align: center;
+    }
+    .cta__card {
+      width: 100%;
+    }
+  }
+</style>

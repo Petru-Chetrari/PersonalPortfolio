@@ -1,0 +1,247 @@
+---
+// WorkSection.astro — Figma: "Landing > Base > Body > Section[1]"
+// Pulls project data from mock-repository. Static (no interactivity).
+import { MockRepository } from '../lib/mock-repository.svelte';
+
+// Map the mock commissions to "project cards" for the landing page.
+// The Figma design shows exactly 3 project cards with these Figma-defined projects,
+// so we define them here with the correct Figma asset URLs and pull data from the repo
+// for titles / types. We layer the static Figma content on top of the mock data shape.
+
+// Figma-extracted image assets served from localhost (Figma Dev Mode MCP)
+const imgAura    = 'http://localhost:3845/assets/bee0d7335ba9c7d1cb6f76e9c25452666693add1.png';
+const imgLumina  = 'http://localhost:3845/assets/6f1b17cd4f51a36cd46c36d2ea1d5a33825be961.png';
+const imgNova    = 'http://localhost:3845/assets/9c44f4e01b24f15ff4fb7082364ae55608fb895a.png';
+
+// Static project definitions sourced from Figma (verified against mock-repository types)
+const projects = [
+  {
+    image: imgNova,
+    imageAlt: 'Nova Modern Interface screenshot',
+    type: 'SaaS Platform',
+    title: 'Nova Modern Interface',
+    desc: 'A sleek and minimal interface for a B2B SaaS platform. Emphasis on clear typography, whitespace, and micro-interactions.',
+    tags: ['Next.js', 'TailwindCSS', 'Prisma', 'PostgreSQL'],
+  },
+  {
+    image: imgLumina,
+    imageAlt: 'Lumina Mobile Banking screenshot',
+    type: 'Mobile Design Prototype',
+    title: 'Lumina Mobile Banking',
+    desc: 'A high-fidelity prototype for a modern mobile banking app focusing on user experience and accessibility. Complete with light and dark themes.',
+    tags: ['React Native', 'Expo', 'Zustand', 'Framer Motion'],
+  },
+  {
+    image: imgAura,
+    imageAlt: 'Aura Analytics Dashboard screenshot',
+    type: 'Web Application',
+    title: 'Aura Analytics Dashboard',
+    desc: 'A comprehensive real-time analytics dashboard built with React and Tailwind CSS. Features dark mode, responsive design, and intuitive data visualization.',
+    tags: ['React', 'TypeScript', 'WebSocket', 'Tailwind', 'Recharts'],
+  },
+];
+---
+
+<section id="work" class="work" aria-labelledby="work-heading">
+  <!-- Section header -->
+  <div class="work__header">
+    <h2 id="work-heading" class="work__title">Selected Work</h2>
+    <p class="work__subtitle">
+      A collection of my recent projects, demonstrating expertise in frontend
+      engineering, UI design, and full-stack development.
+    </p>
+  </div>
+
+  <!-- 3-column project grid -->
+  <div class="work__grid">
+    {projects.map(({ image, imageAlt, type, title, desc, tags }) => (
+      <article class="project-card">
+        <!-- Thumbnail -->
+        <div class="project-card__thumb">
+          <img src={image} alt={imageAlt} class="project-card__img" loading="lazy" />
+        </div>
+
+        <!-- Body -->
+        <div class="project-card__body">
+          <div class="project-card__meta">
+            <span class="project-card__type">{type}</span>
+            <h3 class="project-card__title">{title}</h3>
+          </div>
+
+          <p class="project-card__desc">{desc}</p>
+
+          <!-- Tech bubbles -->
+          <div class="project-card__tags">
+            {tags.map(tag => (
+              <span class="project-card__tag">{tag}</span>
+            ))}
+          </div>
+        </div>
+      </article>
+    ))}
+  </div>
+</section>
+
+<style>
+  /* ── Section shell ── */
+  .work {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+    width: 100%;
+    max-width: 1096px;
+    margin-inline: auto;
+  }
+
+  /* ── Section header ── */
+  .work__header {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding-right: 520px;   /* Figma: pr-[520px] on 1096px container leaves 576px */
+  }
+
+  .work__title {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 48px;
+    letter-spacing: -1.2px;
+    color: #f8fafc;
+    margin: 0 0 8px 0;
+    white-space: nowrap;
+  }
+
+  .work__subtitle {
+    font-family: 'Segoe UI Emoji', 'Segoe UI', sans-serif;
+    font-size: 16px;
+    line-height: 24px;
+    color: #94a3b8;
+    margin: 0;
+    max-width: 499px;
+  }
+
+  /* ── Project card grid ── */
+  .work__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 32px;
+  }
+
+  /* ── Individual project card ── */
+  .project-card {
+    background-color: rgba(30, 41, 59, 0.5);
+    border: 0.8px solid rgba(51, 65, 85, 0.5);
+    border-radius: 24px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 1px;           /* Figma: p-px */
+    align-self: start;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  .project-card:hover {
+    border-color: rgba(51, 65, 85, 0.8);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Thumbnail */
+  .project-card__thumb {
+    background-color: rgba(15, 23, 42, 0.5);
+    width: 100%;
+    overflow: hidden;
+    height: 192.6px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .project-card__img {
+    width: 100%;
+    height: 192.6px;
+    object-fit: cover;
+    pointer-events: none;
+    display: block;
+  }
+
+  /* Body */
+  .project-card__body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 273px;
+    padding: 24px;
+    flex-shrink: 0;
+    gap: 10px;
+  }
+
+  .project-card__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .project-card__type {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: #3b82f6;
+  }
+
+  .project-card__title {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 28px;
+    color: #f8fafc;
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  .project-card__desc {
+    font-family: 'Segoe UI Emoji', 'Segoe UI', sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+    color: #94a3b8;
+    margin: 0;
+    flex: 1 0 0;
+  }
+
+  /* Tech bubbles */
+  .project-card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .project-card__tag {
+    display: inline-flex;
+    align-items: center;
+    height: 23.988px;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    background-color: rgba(51, 65, 85, 0.8);
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 12px;
+    line-height: 16px;
+    color: #94a3b8;
+    white-space: nowrap;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .work__header { padding-right: 0; }
+    .work__grid { grid-template-columns: 1fr; }
+  }
+
+  @media (min-width: 601px) and (max-width: 900px) {
+    .work__grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>

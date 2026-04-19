@@ -7,6 +7,13 @@
     import { onMount } from "svelte";
     import imgLogo from "../assets/logo.svg";
     import imgText from "../assets/brand-text.svg";
+    import PreferenceCenter from "./PreferenceCenter.svelte";
+    import { MockRepository } from "../lib/mock-repository.svelte.ts";
+
+    function handleMar9() {
+        MockRepository.incrementMar9Interactions();
+    }
+
     onMount(() => {
         const handleScroll = () => {
             isScrolled = window.scrollY > 20;
@@ -18,11 +25,11 @@
 
 <header
     class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 {isScrolled
-        ? 'bg-slate-900/90 backdrop-blur-md shadow-[0_4px_30px_rgba(0,0,0,0.1)] py-3'
-        : 'bg-slate-900 py-[20px]'} flex items-start justify-between px-[24px] {className}"
+        ? 'bg-slate-900/90 backdrop-blur-md shadow-[0_4px_30px_rgba(0,0,0,0.1)] py-[12px]'
+        : 'bg-slate-900 py-[20px]'} flex items-center justify-between px-[24px] {className}"
 >
     <!-- Brand -->
-    <div class="flex items-center gap-[8px] h-[52px] -translate-y-[2px]">
+    <a href="/" class="flex items-center gap-[8px]">
         <div class="relative shrink-0 w-[37.559px] h-[45px]">
             <img
                 alt="Logo"
@@ -37,10 +44,10 @@
                 src={imgText.src}
             />
         </div>
-    </div>
+    </a>
 
     <!-- Mobile Menu Button -->
-    <div class="md:hidden flex h-[52px] items-center">
+    <div class="md:hidden flex items-center">
         <button
             class="text-slate-400 hover:text-slate-50 transition-colors"
             onclick={() => (isMobileMenuOpen = !isMobileMenuOpen)}
@@ -73,35 +80,37 @@
     </div>
 
     <!-- Desktop Navigation -->
-    <nav class="hidden md:flex flex-row items-center gap-[37px]">
-        <div class="relative shrink-0 h-[20px] cursor-pointer group">
+    <nav class="hidden md:flex flex-row items-center gap-[37px] h-[36px]">
+        <a href="/" class="relative shrink-0 w-[38.5px] h-[20px] cursor-pointer group">
             <p
-                class="absolute left-0 top-[-1.2px] whitespace-nowrap font-['Segoe_UI',sans-serif] text-[14px] leading-[20px] text-slate-400 group-hover:text-blue-500 transition-colors"
+                class="absolute left-0 top-[-1.2px] whitespace-nowrap font-['Segoe_UI',sans-serif] text-[14px] leading-[20px] text-[#94a3b8] group-hover:text-blue-500 transition-colors"
             >
                 Home
             </p>
             <div
-                class="absolute bg-blue-500 h-[2px] left-0 top-[22px] w-full transition-all"
+                class="absolute bg-blue-500 h-[2px] left-0 top-[22px] w-0 group-hover:w-full transition-all duration-300"
             ></div>
-        </div>
+        </a>
 
-        <div
+        <a
+            href="/submit-commission"
             class="relative shrink-0 w-[50.675px] h-[20px] cursor-pointer group"
         >
             <p
-                class="absolute left-0 top-[-1.2px] whitespace-nowrap font-['Segoe_UI',sans-serif] text-[14px] leading-[20px] text-slate-400 group-hover:text-slate-50 transition-colors"
+                class="absolute left-0 top-[-1.2px] whitespace-nowrap font-['Segoe_UI',sans-serif] text-[14px] leading-[20px] text-[#94a3b8] group-hover:text-slate-50 transition-colors"
             >
                 Hire Me
             </p>
             <div
                 class="absolute bg-blue-500 h-[2px] left-0 top-[22px] w-0 group-hover:w-full transition-all duration-300"
             ></div>
-        </div>
+        </a>
 
         <div class="bg-slate-700 w-px h-[16px] shrink-0"></div>
 
         {#if showClient}
-            <div
+            <a
+                href="/client/commissions"
                 class="relative shrink-0 w-[78.213px] h-[20px] cursor-pointer group"
             >
                 <p
@@ -109,12 +118,12 @@
                 >
                     Client Portal
                 </p>
-            </div>
+            </a>
         {/if}
 
         {#if showAdmin}
             <a
-                href="/admin"
+                href="/admin/stats"
                 class="relative shrink-0 w-[42.063px] h-[20px] cursor-pointer group flex items-center"
             >
                 <span
@@ -125,14 +134,13 @@
         {/if}
 
         <button
-            class="relative shrink-0 w-[75.988px] h-[36px] bg-slate-50 rounded-[26843500px] hover:bg-white hover:shadow-md transition-all cursor-pointer"
+            onclick={handleMar9}
+            class="px-3 py-1 bg-blue-500/20 border border-blue-500/50 rounded-md text-blue-400 hover:bg-blue-500 hover:text-white transition-all text-xs font-semibold"
         >
-            <p
-                class="absolute left-[16px] top-[6.8px] whitespace-nowrap font-['Segoe_UI',sans-serif] font-semibold text-[14px] leading-[20px] text-slate-900"
-            >
-                Sign In
-            </p>
+            +1 Click Mar 9
         </button>
+
+        <PreferenceCenter />
     </nav>
 
     <!-- Mobile Dropdown -->
@@ -146,30 +154,35 @@
                 >Home</a
             >
             <a
-                href="/"
+                href="/submit-commission"
                 class="text-slate-400 hover:text-slate-50 transition-colors"
                 >Hire Me</a
             >
             <div class="bg-slate-700 h-px w-full shrink-0"></div>
             {#if showClient}
                 <a
-                    href="/"
+                    href="/client/commissions"
                     class="text-slate-400 hover:text-slate-50 transition-colors"
                     >Client Portal</a
                 >
             {/if}
             {#if showAdmin}
                 <a
-                    href="/admin"
+                    href="/admin/stats"
                     class="text-slate-400 hover:text-slate-50 transition-colors"
                     >Admin</a
                 >
             {/if}
             <button
-                class="bg-slate-50 text-slate-900 h-[44px] rounded-full font-semibold text-[16px] hover:bg-white transition-all w-full"
+                onclick={handleMar9}
+                class="w-full px-4 py-3 bg-blue-500/20 border border-blue-500/50 rounded-lg text-blue-400 hover:bg-blue-500 hover:text-white transition-all text-sm font-semibold"
             >
-                Sign In
+                +1 Click Mar 9
             </button>
+
+            <div class="w-full flex justify-center pb-2">
+                <PreferenceCenter />
+            </div>
         </div>
     {/if}
 </header>

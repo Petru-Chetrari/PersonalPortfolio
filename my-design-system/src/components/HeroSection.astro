@@ -1,0 +1,187 @@
+---
+// HeroSection.astro — Figma: "Landing > Base > Body > Section[0]"
+// Static: no interactivity needed.
+---
+
+<section class="hero" aria-labelledby="hero-heading">
+  <!-- Availability badge -->
+  <div class="hero__badge">
+    <span class="hero__badge-dot" aria-hidden="true"></span>
+    Available for new commissions
+  </div>
+
+  <!-- Headline -->
+  <div class="hero__heading-block" id="hero-heading">
+    <h1 class="hero__headline">
+      Building digital <span class="hero__headline-accent">experiences</span>
+    </h1>
+    <p class="hero__headline-line2">that inspire.</p>
+  </div>
+
+  <!-- Subtitle -->
+  <p class="hero__subtitle">
+    Hi, I'm John Doe. A full-stack developer specializing in building exceptional
+    digital experiences. I turn complex problems into elegant, intuitive interfaces.
+  </p>
+
+  <!-- CTAs -->
+  <div class="hero__ctas">
+    <a href="/submit-commission" class="hero__cta hero__cta--primary" id="hero-cta-commission">
+      Request a Commission
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path d="M3 8h10M9 4l4 4-4 4" stroke="black" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </a>
+    <a href="#work" class="hero__cta hero__cta--secondary" id="hero-cta-work">
+      View Work
+    </a>
+  </div>
+</section>
+
+<style>
+  /* ── Section shell ── */
+  .hero {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding-top: 0;        /* Layout.astro supplies pt-[100px] */
+    padding-bottom: 0;
+    gap: 32px;
+    width: 100%;
+    max-width: 896px;      /* Figma Heading 1 container width */
+    margin-inline: auto;
+  }
+
+  /* ── Availability badge ── */
+  .hero__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 33.6px;
+    padding-inline: 16px;
+    border-radius: 9999px;
+    background-color: #1e293b;
+    border: 0.8px solid #334155;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    color: #cbd5e1;
+    white-space: nowrap;
+  }
+
+  .hero__badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    background-color: #00bc7d;
+    opacity: 0.63;
+    flex-shrink: 0;
+    animation: badge-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes badge-pulse {
+    0%, 100% { opacity: 0.63; }
+    50%       { opacity: 0.25; }
+  }
+
+  /* ── Headline block ── */
+  .hero__heading-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .hero__headline {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: clamp(40px, 6.5vw, 72px);
+    font-weight: 900;
+    line-height: 90px;
+    letter-spacing: -3.6px;
+    color: #f8fafc;
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  .hero__headline-accent {
+    background-image: linear-gradient(90deg, #60a5fa 0%, #00d3f3 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .hero__headline-line2 {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: clamp(40px, 6.5vw, 72px);
+    font-weight: 900;
+    line-height: 90px;
+    letter-spacing: -3.6px;
+    color: #f8fafc;
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  /* ── Subtitle ── */
+  .hero__subtitle {
+    font-family: 'Segoe UI Emoji', 'Segoe UI', sans-serif;
+    font-size: 20px;
+    line-height: 28px;
+    color: #94a3b8;
+    max-width: 660px;
+    margin: 0;
+  }
+
+  /* ── CTAs ── */
+  .hero__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    height: 49.6px;
+  }
+
+  .hero__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 24px;
+    border-radius: 9999px;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 24px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: opacity 0.15s ease, transform 0.1s ease;
+  }
+  .hero__cta:active { transform: scale(0.97); }
+
+  .hero__cta--primary {
+    background-color: #f8fafc;
+    color: #000;
+  }
+  .hero__cta--primary:hover { opacity: 0.9; }
+
+  .hero__cta--secondary {
+    background-color: #1e293b;
+    border: 0.8px solid #334155;
+    color: #f8fafc;
+  }
+  .hero__cta--secondary:hover { opacity: 0.85; }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .hero__headline,
+    .hero__headline-line2 {
+      white-space: normal;
+      line-height: 1.1;
+    }
+  }
+</style>

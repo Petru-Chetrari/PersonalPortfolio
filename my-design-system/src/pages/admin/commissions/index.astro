@@ -52,7 +52,7 @@ import AdminDashboard from '../../../layouts/AdminDashboard.astro';
   </div>
 
   <script>
-    import { MockRepository, type Commission, type Status } from '../../../lib/mock-repository';
+    import { MockRepository, type Commission, type Status } from '../../../lib/mock-repository.svelte.ts';
 
     const statusConfig: Record<Status, {label: string; color: string; bg: string; dot: string}> = {
       pending:   { label: 'Pending',   color: '#FFB900', bg: 'rgba(255,185,0,0.1)',   dot: '#FFB900' },
