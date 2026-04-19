@@ -2,18 +2,21 @@
 // index.astro — Landing page
 // Layout.astro provides: <html>, <head>, <body>, Header, Footer, and the <main> slot.
 // This file outputs only the slot content.
-import AmbientGlow  from '../components/AmbientGlow.astro';
-import HeroSection  from '../components/HeroSection.astro';
-import WorkSection  from '../components/WorkSection.astro';
-import AboutSection from '../components/AboutSection.astro';
-import CtaBanner    from '../components/CtaBanner.astro';
-import Layout       from '../layouts/Layout.astro';
+import AmbientGlow   from '../components/AmbientGlow.astro';
+import HeroSection   from '../components/HeroSection.astro';
+import WorkCarousel  from '../components/WorkCarousel.svelte';
+import AboutSection  from '../components/AboutSection.astro';
+import CtaBanner     from '../components/CtaBanner.astro';
+import Layout        from '../layouts/Layout.astro';
+import { MockRepository } from '../lib/mock-repository.svelte';
+
+const projects = MockRepository.getProjects();
 ---
 
 <Layout>
   <AmbientGlow />
   <HeroSection />
-  <WorkSection />
+  <WorkCarousel client:load projects={projects} />
   <AboutSection />
   <CtaBanner />
 </Layout>

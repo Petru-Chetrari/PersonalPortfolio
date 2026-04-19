@@ -23,6 +23,15 @@ export interface Interaction {
   commissions: number;
 }
 
+export interface Project {
+  image: string;
+  imageAlt: string;
+  type: string;
+  title: string;
+  desc: string;
+  tags: string[];
+}
+
 // In-memory state (survives Astro View Transition navigation but resets on hard refresh)
 let commissions: Commission[] = $state([
   { id: 'COM-001', client: 'Alex M.', title: 'Portfolio Website Redesign', appType: 'Web App', status: 'active', date: '2026-03-20', dueDate: '2026-04-15', note: 'Wire-frames sent, awaiting feedback on hero section.' },
@@ -45,7 +54,38 @@ let interactions = $state([
   { date: 'Mar 10', links: 240, projects: 220, commissions: 140 },
 ]);
 
+let projectsData: Project[] = $state([
+  {
+    image: 'http://localhost:3845/assets/9c44f4e01b24f15ff4fb7082364ae55608fb895a.png',
+    imageAlt: 'Nova Modern Interface screenshot',
+    type: 'SaaS Platform',
+    title: 'Nova Modern Interface',
+    desc: 'A sleek and minimal interface for a B2B SaaS platform. Emphasis on clear typography, whitespace, and micro-interactions.',
+    tags: ['Next.js', 'TailwindCSS', 'Prisma', 'PostgreSQL'],
+  },
+  {
+    image: 'http://localhost:3845/assets/6f1b17cd4f51a36cd46c36d2ea1d5a33825be961.png',
+    imageAlt: 'Lumina Mobile Banking screenshot',
+    type: 'Mobile Design Prototype',
+    title: 'Lumina Mobile Banking',
+    desc: 'A high-fidelity prototype for a modern mobile banking app focusing on user experience and accessibility. Complete with light and dark themes.',
+    tags: ['React Native', 'Expo', 'Zustand', 'Framer Motion'],
+  },
+  {
+    image: 'http://localhost:3845/assets/bee0d7335ba9c7d1cb6f76e9c25452666693add1.png',
+    imageAlt: 'Aura Analytics Dashboard screenshot',
+    type: 'Web Application',
+    title: 'Aura Analytics Dashboard',
+    desc: 'A comprehensive real-time analytics dashboard built with React and Tailwind CSS. Features dark mode, responsive design, and intuitive data visualization.',
+    tags: ['React', 'TypeScript', 'WebSocket', 'Tailwind', 'Recharts'],
+  },
+]);
+
 export const MockRepository = {
+  getProjects: () => {
+    return [...projectsData];
+  },
+
   getCommissions: () => {
     return [...commissions];
   },
