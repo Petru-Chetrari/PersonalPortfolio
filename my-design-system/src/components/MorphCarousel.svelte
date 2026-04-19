@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { onMount, tick } from 'svelte';
-  import { fly } from 'svelte/transition';
-  import { expoOut } from 'svelte/easing';
-  import { prepareWithSegments, layoutWithLines } from '@chenglou/pretext';
-  import type { Project } from '../lib/mock-repository.svelte';
+  import { onMount, tick } from "svelte";
+  import { fly } from "svelte/transition";
+  import { expoOut, backOut } from "svelte/easing";
+  import { prepareWithSegments, layoutWithLines } from "@chenglou/pretext";
+  import type { Project } from "../lib/mock-repository.svelte";
 
   export let projects: Project[] = [];
   let currentIndex = 0;
@@ -15,7 +15,7 @@
 
   let canvas: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D | null = null;
-  let container: HTMLElement; 
+  let container: HTMLElement;
   let width = 0;
   let height = 0;
 
@@ -39,7 +39,7 @@
 
   let glyphs: GlyphState[] = [];
   let animationFrame: number;
-  let cssVars = { accent: '#f43f5e', primary: '#ffffff', secondary: '#a1a1aa' };
+  let cssVars = { accent: "#f43f5e", primary: "#ffffff", secondary: "#a1a1aa" };
 
   function next() {
     if (projects.length === 0 || isAnimating) return;
@@ -56,38 +56,46 @@
   }
 
   function extractCSSVars() {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const computed = getComputedStyle(document.body);
       cssVars = {
-        accent: computed.getPropertyValue('--color-accent').trim() || cssVars.accent,
-        primary: computed.getPropertyValue('--color-text-primary').trim() || cssVars.primary,
-        secondary: computed.getPropertyValue('--color-text-secondary').trim() || cssVars.secondary,
+        accent:
+          computed.getPropertyValue("--color-accent").trim() || cssVars.accent,
+        primary:
+          computed.getPropertyValue("--color-text-primary").trim() ||
+          cssVars.primary,
+        secondary:
+          computed.getPropertyValue("--color-text-secondary").trim() ||
+          cssVars.secondary,
       };
     }
   }
 
   // --- Svelte Transitions (Layer 0 Image) ---
   function slideIn(node: HTMLElement, { duration = DURATION }) {
-    if (prefersReducedMotion) return { duration, css: (t: number) => `opacity: ${t};` };
+    if (prefersReducedMotion)
+      return { duration, css: (t: number) => `opacity: ${t};` };
     return {
       duration,
       css: (t: number) => {
         const easedU = expoOut(1 - t);
-        if (direction === 1) return `transform: translateY(${easedU * -100}%); z-index: 2;`;
+        if (direction === 1)
+          return `transform: translateY(${easedU * -100}%); z-index: 2;`;
         return `transform: translateY(0%); z-index: 1;`;
-      }
+      },
     };
   }
 
   function slideOut(node: HTMLElement, { duration = DURATION }) {
-    if (prefersReducedMotion) return { duration, css: (t: number) => `opacity: ${t};` };
+    if (prefersReducedMotion)
+      return { duration, css: (t: number) => `opacity: ${t};` };
     return {
       duration,
       css: (t: number) => {
         const easedU = expoOut(1 - t);
         if (direction === 1) return `transform: translateY(0%); z-index: 1;`;
         return `transform: translateY(${easedU * -100}%); z-index: 2;`;
-      }
+      },
     };
   }
 
@@ -98,86 +106,76 @@
         const easedT = expoOut(t);
         const yOffset = direction === 1 ? 10 : -10;
         return `opacity: ${easedT}; transform: translateY(${(1 - easedT) * yOffset}px);`;
-      }
+      },
     };
   }
 
   // --- Layer 2: Pretext Logic Layer ---
   function computeLayout(project: Project) {
-    if (!ctx) return [];
+    if (!ctx || !container) return [];
     
-    const isDesktop = window.innerWidth >= 1024;
-    // Match padding defined in CSS (--space-8 is approx 32px, --space-10 is approx 40px)
-    const padding = isDesktop ? 40 : 32;
-    // Gaps match CSS (--space-2 is 8px, --space-6 is 24px)
-    const gapMeta = 8;
-    const gapMain = 24; 
-    const tagsHeight = 36 + 8; // approx tag height + margin-top
-    
-    const textWidth = width - padding * 2;
-    const startX = padding;
-
+    const containerRect = container.getBoundingClientRect();
     let newGlyphs: Omit<GlyphState, 'targetX'|'targetY'|'opacity'|'targetOpacity'|'isMapped'|'vx'|'vy'|'mass'>[] = [];
-    
-    function measureHeight(text: string, font: string) {
-      if (!text) return 0;
-      const prepared = prepareWithSegments(text, font);
-      const lineHeight = parseInt(font.match(/\d+px/)?.[0] || '16', 10) * 1.3;
-      const { lineCount } = layoutWithLines(prepared, textWidth, lineHeight);
-      return lineCount * lineHeight;
-    }
 
-    // Adjust font sizes based on your design system. These match typical values for text-sm, text-3xl, text-lg
+    // Align with typical design system variables
     const fonts = {
-      type: 'bold 14px "Inter", sans-serif',
-      title: 'bold 30px "Inter", sans-serif',
-      desc: '400 18px "Inter", sans-serif'
+      type: { font: 'bold 14px "Inter", sans-serif', lh: 1.2 },
+      title: { font: 'bold 32px "Inter", sans-serif', lh: 1.25 },
+      desc: { font: '400 18px "Inter", sans-serif', lh: 1.625 }
     };
 
-    const typeHeight = measureHeight(project.type.toUpperCase(), fonts.type);
-    const titleHeight = measureHeight(project.title, fonts.title);
-    const descHeight = measureHeight(project.desc, fonts.desc);
-
-    const totalHeight = typeHeight + gapMeta + titleHeight + gapMain + descHeight + tagsHeight;
-
-    // Vertically center content block inside the viewport
-    let currentY = (height - totalHeight) / 2;
-
-    function processText(text: string, font: string, color: string, startY: number, uppercase = false) {
-      if (!text) return startY;
+    function processText(text: string, fontSpec: {font: string, lh: number}, color: string, selector: string, uppercase = false) {
+      if (!text) return;
+      
+      const el = container.querySelector(selector);
+      if (!el) return;
+      
+      const rect = el.getBoundingClientRect();
+      const startX = rect.left - containerRect.left;
+      const startY = rect.top - containerRect.top;
+      const textWidth = rect.width;
+      
       const processedText = uppercase ? text.toUpperCase() : text;
-      const prepared = prepareWithSegments(processedText, font);
-      const fontSize = parseInt(font.match(/\d+px/)?.[0] || '16', 10);
-      const lineHeight = fontSize * 1.3;
+      const prepared = prepareWithSegments(processedText, fontSpec.font);
+      const fontSize = parseInt(fontSpec.font.match(/\d+px/)?.[0] || '16', 10);
+      const lineHeight = fontSize * fontSpec.lh;
       const { lines } = layoutWithLines(prepared, textWidth, lineHeight);
+
+      // In CSS, text is vertically centered within its line-height.
+      // So the distance from top of the line-box to the baseline is:
+      // (lineHeight - fontSize) / 2 + fontSize
+      const baselineOffset = (lineHeight - fontSize) / 2 + fontSize;
 
       let lineY = startY;
       for (const line of lines) {
         let charX = startX;
         for (let i = 0; i < line.text.length; i++) {
           const char = line.text[i];
-          ctx!.font = font;
+          ctx!.font = fontSpec.font;
           const charWidth = ctx!.measureText(char).width;
           if (char.trim() !== '') {
-            newGlyphs.push({ char, x: charX, y: lineY + fontSize, font, color });
+            newGlyphs.push({ char, x: charX, y: lineY + baselineOffset, font: fontSpec.font, color });
           }
           charX += charWidth;
         }
         lineY += lineHeight;
       }
-      return lineY;
     }
 
-    const nextY1 = processText(project.type, fonts.type, cssVars.accent, currentY, true);
-    const nextY2 = processText(project.title, fonts.title, cssVars.primary, nextY1 + gapMeta);
-    processText(project.desc, fonts.desc, cssVars.secondary, nextY2 + gapMain);
+    processText(project.type, fonts.type, cssVars.accent, '.slide-type', true);
+    processText(project.title, fonts.title, cssVars.primary, '.slide-title');
+    processText(project.desc, fonts.desc, cssVars.secondary, '.slide-desc');
 
     return newGlyphs;
   }
 
   // --- Morphing Engine ---
-  function triggerMorph() {
+  async function triggerMorph() {
     isAnimating = true;
+    
+    // Wait for Svelte to update the Semantic DOM so we can measure the NEW layout's bounding boxes
+    await tick();
+    
     const newLayout = computeLayout(projects[currentIndex]);
 
     const oldGlyphs = [...glyphs];
@@ -196,8 +194,8 @@
           targetOpacity: 1,
           font: newG.font,
           color: newG.color,
-          char: newG.char, 
-          isMapped: true
+          char: newG.char,
+          isMapped: true,
         });
       } else if (oldG && !newG) {
         glyphs.push({
@@ -207,8 +205,8 @@
           targetOpacity: 0,
           isMapped: false,
           vx: (Math.random() - 0.5) * 4,
-          vy: Math.random() * 5 + 2, 
-          mass: Math.random() * 0.5 + 0.5
+          vy: Math.random() * 5 + 2,
+          mass: Math.random() * 0.5 + 0.5,
         });
       } else if (!oldG && newG) {
         glyphs.push({
@@ -222,7 +220,9 @@
           opacity: 0,
           targetOpacity: 1,
           isMapped: true,
-          vx: 0, vy: 0, mass: 1
+          vx: 0,
+          vy: 0,
+          mass: 1,
         });
       }
     }
@@ -244,8 +244,8 @@
         } else {
           g.x += g.vx;
           g.y += g.vy;
-          g.vy += 0.25 * g.mass; 
-          g.opacity = Math.max(0, g.opacity - 0.05); 
+          g.vy += 0.25 * g.mass;
+          g.opacity = Math.max(0, g.opacity - 0.05);
         }
 
         ctx!.globalAlpha = Math.max(0, g.opacity);
@@ -260,11 +260,11 @@
 
       ctx!.globalAlpha = 1;
 
-      if (t < 1 || glyphs.some(g => !g.isMapped && g.opacity > 0)) {
+      if (t < 1 || glyphs.some((g) => !g.isMapped && g.opacity > 0)) {
         animationFrame = requestAnimationFrame(renderFrame);
       } else {
         isAnimating = false;
-        glyphs.forEach(g => {
+        glyphs.forEach((g) => {
           if (g.isMapped) {
             g.x = g.targetX;
             g.y = g.targetY;
@@ -274,7 +274,7 @@
         drawStaticCanvas();
       }
     }
-    
+
     cancelAnimationFrame(animationFrame);
     animationFrame = requestAnimationFrame(renderFrame);
   }
@@ -294,7 +294,9 @@
   }
 
   onMount(() => {
-    prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     extractCSSVars();
 
     const ro = new ResizeObserver(() => {
@@ -303,16 +305,24 @@
       height = container.clientHeight;
       canvas.width = width * window.devicePixelRatio;
       canvas.height = height * window.devicePixelRatio;
-      ctx = canvas.getContext('2d');
+      ctx = canvas.getContext("2d");
       if (ctx) {
         ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-        ctx.textBaseline = 'bottom';
+        ctx.textBaseline = "bottom";
       }
-      
+
       if (projects.length > 0) {
         const layout = computeLayout(projects[currentIndex]);
-        glyphs = layout.map(l => ({
-          ...l, targetX: l.x, targetY: l.y, opacity: 1, targetOpacity: 1, isMapped: true, vx: 0, vy: 0, mass: 1
+        glyphs = layout.map((l) => ({
+          ...l,
+          targetX: l.x,
+          targetY: l.y,
+          opacity: 1,
+          targetOpacity: 1,
+          isMapped: true,
+          vx: 0,
+          vy: 0,
+          mass: 1,
         }));
         if (!prefersReducedMotion) drawStaticCanvas();
       }
@@ -340,10 +350,26 @@
     </div>
     <div class="carousel-nav">
       <button class="nav-btn" on:click={prev} aria-label="Previous project">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+          ><path
+            d="M15 18L9 12L15 6"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          /></svg
+        >
       </button>
       <button class="nav-btn" on:click={next} aria-label="Next project">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+          ><path
+            d="M9 18L15 12L9 6"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          /></svg
+        >
       </button>
     </div>
   </div>
@@ -355,7 +381,7 @@
         <article class="mb-8 border-b pb-4">
           <h3 class="text-xl font-bold">{p.title}</h3>
           <p>{p.desc}</p>
-          <img src={p.image} alt="" class="max-w-full h-auto mt-4"/>
+          <img src={p.image} alt="" class="max-w-full h-auto mt-4" />
         </article>
       {/each}
     </div>
@@ -363,58 +389,67 @@
 
   {#if currentProject}
     <div class="carousel-content">
-      
       <!-- 1. The Image Viewport (Animated) -->
       <div class="image-viewport">
         {#key currentIndex}
-          <div 
+          <div
             class="image-layer will-change-transform"
             in:slideIn
             out:slideOut
           >
-            <img 
-              src={currentProject.image} 
-              alt={currentProject.imageAlt || currentProject.title} 
-              class="slide-image" 
+            <img
+              src={currentProject.image}
+              alt={currentProject.imageAlt || currentProject.title}
+              class="slide-image"
             />
           </div>
         {/key}
       </div>
 
       <!-- 2. The Text Viewport (Tri-Layer Canvas Setup) -->
-      <div class="text-viewport" bind:this={container}>
-        
-        <!-- Layer 1: Semantic DOM (A11y/SEO) -->
-        <article class="layer-1-semantic absolute inset-0 pointer-events-none p-8 lg:p-10" aria-hidden={prefersReducedMotion ? "true" : "false"}>
-          <!-- This block is visually hidden for canvas users, but screen reader accessible -->
-          <div class="slide-meta" style:opacity={prefersReducedMotion ? 1 : 0}>
-            <span class="slide-type">{currentProject.type}</span>
-            <h3 class="slide-title">{currentProject.title}</h3>
-          </div>
+      <div class="text-viewport">
+        <!-- Wrapper div that fills the padded space with no borders/padding -->
+        <div class="content-wrapper" bind:this={container}>
           
-          <p class="slide-desc" style:opacity={prefersReducedMotion ? 1 : 0}>{currentProject.desc}</p>
-          
-          <!-- Tags are fully DOM-rendered so they maintain CSS styling/backgrounds -->
-          <!-- We position them at the bottom so they flow naturally -->
-          {#key currentIndex}
-            <div class="slide-tags mt-auto absolute bottom-8 lg:bottom-10 left-8 lg:left-10 right-8 lg:right-10" in:fadeSlide out:fadeSlide>
-              {#each currentProject.tags as tag}
-                <span class="slide-tag">{tag}</span>
+          <!-- Layer 1: Semantic DOM (A11y/SEO) -->
+          <article class="layer-1-semantic" aria-hidden={prefersReducedMotion ? "true" : "false"}>
+            <div class="slide-meta" style:opacity={prefersReducedMotion ? 1 : 0}>
+              <span class="slide-type">{currentProject.type}</span>
+              <h3 class="slide-title">{currentProject.title}</h3>
+            </div>
+
+            <p class="slide-desc" style:opacity={prefersReducedMotion ? 1 : 0}>
+              {currentProject.desc}
+            </p>
+
+            <!-- Tags are fully DOM-rendered so they maintain CSS styling/backgrounds -->
+            <!-- Odometer/Cassette animation for tags -->
+            <div class="slide-tags mt-auto">
+              {#each currentProject.tags as tag, i (i)}
+                <div class="pill-slot">
+                  {#key currentIndex + "-" + tag}
+                    <span
+                      class="slide-tag"
+                      in:fly={{ y: -20, duration: 400, delay: (i * 50) + 100, easing: backOut }}
+                      out:fly={{ y: 20, duration: 300, delay: i >= currentProject.tags.length ? 0 : (i * 50), easing: backOut }}
+                    >
+                      {tag}
+                    </span>
+                  {/key}
+                </div>
               {/each}
             </div>
-          {/key}
-        </article>
+          </article>
 
-        <!-- Layer 2: Render Layer (Canvas) -->
-        <canvas 
-          bind:this={canvas} 
-          class="layer-2-render absolute inset-0 pointer-events-none will-change-transform z-10"
-          style:opacity={prefersReducedMotion ? 0 : 1}
-          aria-hidden="true"
-        ></canvas>
-        
+          <!-- Layer 2: Render Layer (Canvas) -->
+          <canvas
+            bind:this={canvas}
+            class="layer-2-render"
+            style:opacity={prefersReducedMotion ? 0 : 1}
+            aria-hidden="true"
+          ></canvas>
+        </div>
       </div>
-
     </div>
   {/if}
 </section>
@@ -439,7 +474,7 @@
     gap: var(--space-4);
     position: relative;
   }
-  
+
   @media (min-width: 768px) {
     .carousel-header {
       flex-direction: row;
@@ -530,7 +565,7 @@
     position: relative;
     width: 100%;
     min-height: 300px;
-    overflow: hidden; 
+    overflow: hidden;
     background-color: var(--color-bg-base);
   }
 
@@ -562,15 +597,26 @@
   /* ── Text Viewport ── */
   .text-viewport {
     flex: 1 1 45%;
-    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-8);
     background-color: var(--color-bg-surface);
-    min-height: 400px; /* Ensure space for content */
+    min-height: 400px;
   }
 
   @media (min-width: 1024px) {
     .text-viewport {
+      padding: var(--space-10);
       min-height: 520px;
     }
+  }
+
+  .content-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
   }
 
   .layer-1-semantic {
@@ -578,6 +624,14 @@
     flex-direction: column;
     justify-content: center;
     gap: var(--space-6);
+    flex-grow: 1;
+  }
+
+  .layer-2-render {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 10;
   }
 
   .slide-meta {
@@ -620,11 +674,19 @@
     gap: var(--space-2);
   }
 
+  /* ── Pill Slot (CSS Grid Stacking Mask) ── */
+  .pill-slot {
+    display: grid;
+    overflow: hidden;
+    border-radius: var(--radius-full);
+  }
+
   .slide-tag {
+    grid-column: 1;
+    grid-row: 1;
     display: inline-flex;
     align-items: center;
     padding: var(--space-2) var(--space-4);
-    border-radius: var(--radius-full);
     background-color: var(--color-bg-base);
     border: var(--border-thin) solid var(--color-border);
     font-family: var(--font-ui);
