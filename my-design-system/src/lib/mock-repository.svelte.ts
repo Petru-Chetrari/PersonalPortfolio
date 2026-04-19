@@ -56,7 +56,7 @@ let interactions = $state([
 
 let projectsData: Project[] = $state([
   {
-    image: 'http://localhost:3845/assets/9c44f4e01b24f15ff4fb7082364ae55608fb895a.png',
+    image: '/assets/figma-exports/project-nova.png',
     imageAlt: 'Nova Modern Interface screenshot',
     type: 'SaaS Platform',
     title: 'Nova Modern Interface',
@@ -64,7 +64,7 @@ let projectsData: Project[] = $state([
     tags: ['Next.js', 'TailwindCSS', 'Prisma', 'PostgreSQL'],
   },
   {
-    image: 'http://localhost:3845/assets/6f1b17cd4f51a36cd46c36d2ea1d5a33825be961.png',
+    image: '/assets/figma-exports/project-lumina.png',
     imageAlt: 'Lumina Mobile Banking screenshot',
     type: 'Mobile Design Prototype',
     title: 'Lumina Mobile Banking',
@@ -72,7 +72,7 @@ let projectsData: Project[] = $state([
     tags: ['React Native', 'Expo', 'Zustand', 'Framer Motion'],
   },
   {
-    image: 'http://localhost:3845/assets/bee0d7335ba9c7d1cb6f76e9c25452666693add1.png',
+    image: '/assets/figma-exports/project-aura.png',
     imageAlt: 'Aura Analytics Dashboard screenshot',
     type: 'Web Application',
     title: 'Aura Analytics Dashboard',

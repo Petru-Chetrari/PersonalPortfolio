@@ -1,11 +1,10 @@
 <script lang="ts">
   import { MockRepository } from '../lib/mock-repository.svelte';
 
-  // ── Figma icon SVG assets (served by Figma Dev Mode MCP) ──────────────────
-  const iconWebDev    = 'http://localhost:3845/assets/88ab1aac2a27e00812e5066a1b4bcdda7bd89d4d.svg';
-  const iconLanding   = 'http://localhost:3845/assets/c5434a8fedde3ce807fa43e76ae5bcdb59d46cd8.svg';
-  const iconUIUX      = 'http://localhost:3845/assets/77b50419a5342b06c3f43d58e22d85d4bde5dcf1.svg';
-  const imgSendIcon   = 'http://localhost:3845/assets/60c8de9f1a6d2fc7a4c52b28e4baf6970bac7d57.svg';
+  const iconWebDev    = '/assets/figma-exports/icon-web-dev.svg';
+  const iconLanding   = '/assets/figma-exports/icon-landing.svg';
+  const iconUIUX      = '/assets/figma-exports/icon-ui-ux.svg';
+  const imgSendIcon   = '/assets/figma-exports/icon-send.svg';
 
   // ── Services list (left column) ───────────────────────────────────────────
   const services = [
