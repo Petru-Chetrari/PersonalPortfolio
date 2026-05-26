@@ -1,8 +1,14 @@
 import request from 'supertest';
 import app from '../src/app';
-import { resetStore } from '../src/store/memory.store';
+import { setupTestDB, closeTestDB } from './setupTestDB';
 
-beforeEach(() => resetStore());
+beforeEach(async () => {
+  await setupTestDB();
+});
+
+afterAll(async () => {
+  await closeTestDB();
+});
 
 /** Fetch the first project's id from the seeded list */
 async function getFirstProjectId(): Promise<string> {

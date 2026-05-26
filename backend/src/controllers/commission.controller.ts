@@ -14,30 +14,30 @@ function parsePageLimit(req: Request) {
 }
 
 export const CommissionController = {
-  list(req: Request, res: Response, next: NextFunction): void {
+  async list(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { page, limit } = parsePageLimit(req);
       const client = req.query['client'] as string | undefined;
       const result = client
-        ? CommissionService.listByClient(client, page, limit)
-        : CommissionService.list(page, limit);
+        ? await CommissionService.listByClient(client, page, limit)
+        : await CommissionService.list(page, limit);
       res.json(result);
     } catch (err) {
       next(err);
     }
   },
 
-  stats(_req: Request, res: Response, next: NextFunction): void {
+  async stats(_req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      res.json(CommissionService.getStats());
+      res.json(await CommissionService.getStats());
     } catch (err) {
       next(err);
     }
   },
 
-  getById(req: Request, res: Response, next: NextFunction): void {
+  async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const commission = CommissionService.getById(req.params['id'] as string);
+      const commission = await CommissionService.getById(req.params['id'] as string);
       if (!commission) { res.status(404).json({ error: 'Commission not found' }); return; }
       res.json(commission);
     } catch (err) {
@@ -45,10 +45,10 @@ export const CommissionController = {
     }
   },
 
-  create(req: Request, res: Response, next: NextFunction): void {
+  async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const payload = CommissionCreateSchema.parse(req.body);
-      const commission = CommissionService.create(payload);
+      const commission = await CommissionService.create(payload);
       res.status(201).json(commission);
     } catch (err) {
       if (err instanceof ZodError) {
@@ -59,10 +59,10 @@ export const CommissionController = {
     }
   },
 
-  update(req: Request, res: Response, next: NextFunction): void {
+  async update(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const payload = CommissionUpdateSchema.parse(req.body);
-      const commission = CommissionService.update(req.params['id'] as string, payload);
+      const commission = await CommissionService.update(req.params['id'] as string, payload);
       if (!commission) { res.status(404).json({ error: 'Commission not found' }); return; }
       res.json(commission);
     } catch (err) {
@@ -74,10 +74,10 @@ export const CommissionController = {
     }
   },
 
-  patchStatus(req: Request, res: Response, next: NextFunction): void {
+  async patchStatus(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { status } = CommissionStatusPatchSchema.parse(req.body);
-      const commission = CommissionService.patchStatus(req.params['id'] as string, status);
+      const commission = await CommissionService.patchStatus(req.params['id'] as string, status);
       if (!commission) { res.status(404).json({ error: 'Commission not found' }); return; }
       res.json(commission);
     } catch (err) {
@@ -89,9 +89,9 @@ export const CommissionController = {
     }
   },
 
-  remove(req: Request, res: Response, next: NextFunction): void {
+  async remove(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const deleted = CommissionService.remove(req.params['id'] as string);
+      const deleted = await CommissionService.remove(req.params['id'] as string);
       if (!deleted) { res.status(404).json({ error: 'Commission not found' }); return; }
       res.status(204).send();
     } catch (err) {

@@ -14,18 +14,18 @@ function parsePageLimit(req: Request) {
 }
 
 export const InteractionController = {
-  list(req: Request, res: Response, next: NextFunction): void {
+  async list(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { page, limit } = parsePageLimit(req);
-      res.json(InteractionService.list(page, limit));
+      res.json(await InteractionService.list(page, limit));
     } catch (err) {
       next(err);
     }
   },
 
-  getByDate(req: Request, res: Response, next: NextFunction): void {
+  async getByDate(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const interaction = InteractionService.getByDate(req.params['date'] as string);
+      const interaction = await InteractionService.getByDate(req.params['date'] as string);
       if (!interaction) { res.status(404).json({ error: 'Interaction not found' }); return; }
       res.json(interaction);
     } catch (err) {
@@ -33,10 +33,10 @@ export const InteractionController = {
     }
   },
 
-  create(req: Request, res: Response, next: NextFunction): void {
+  async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const payload = InteractionCreateSchema.parse(req.body);
-      const result = InteractionService.create(payload);
+      const result = await InteractionService.create(payload);
       if (!result) {
         res.status(409).json({ error: `Interaction for date "${payload.date}" already exists` });
         return;
@@ -51,10 +51,10 @@ export const InteractionController = {
     }
   },
 
-  update(req: Request, res: Response, next: NextFunction): void {
+  async update(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const payload = InteractionUpdateSchema.parse(req.body);
-      const result = InteractionService.update(req.params['date'] as string, payload);
+      const result = await InteractionService.update(req.params['date'] as string, payload);
       if (!result) { res.status(404).json({ error: 'Interaction not found' }); return; }
       res.json(result);
     } catch (err) {
@@ -66,10 +66,10 @@ export const InteractionController = {
     }
   },
 
-  increment(req: Request, res: Response, next: NextFunction): void {
+  async increment(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const deltas = InteractionIncrementSchema.parse(req.body ?? {});
-      const result = InteractionService.increment(req.params['date'] as string, deltas);
+      const result = await InteractionService.increment(req.params['date'] as string, deltas);
       res.json(result);
     } catch (err) {
       if (err instanceof ZodError) {
@@ -80,9 +80,9 @@ export const InteractionController = {
     }
   },
 
-  remove(req: Request, res: Response, next: NextFunction): void {
+  async remove(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const deleted = InteractionService.remove(req.params['date'] as string);
+      const deleted = await InteractionService.remove(req.params['date'] as string);
       if (!deleted) { res.status(404).json({ error: 'Interaction not found' }); return; }
       res.status(204).send();
     } catch (err) {

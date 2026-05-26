@@ -1,8 +1,14 @@
 import request from 'supertest';
 import app from '../src/app';
-import { resetStore } from '../src/store/memory.store';
+import { setupTestDB, closeTestDB } from './setupTestDB';
 
-beforeEach(() => resetStore());
+beforeEach(async () => {
+  await setupTestDB();
+});
+
+afterAll(async () => {
+  await closeTestDB();
+});
 
 describe('GET /interactions', () => {
   it('returns seeded data with default pagination', async () => {
