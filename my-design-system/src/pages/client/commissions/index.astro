@@ -1,14 +1,11 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import CommissionList from '../../../components/CommissionList.svelte';
-import { MockRepository } from '../../../lib/mock-repository.svelte.ts';
-
-const commissionsData = MockRepository.getClientCommissions();
 ---
 
 <Layout title="Client Portal — Commissions">
   <div class="commissions-wrap">
-    <CommissionList data={commissionsData} client:load />
+    <CommissionList client:load />
   </div>
 </Layout>
 

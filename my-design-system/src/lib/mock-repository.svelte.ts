@@ -1,6 +1,11 @@
 // src/lib/mock-repository.ts
+// ⚠️  DEPRECATED — data operations have moved to src/lib/api.ts
+// This file is kept only so existing TYPE imports still resolve.
+// Do NOT add new data methods here. Import from api.ts instead.
+// Types are re-exported from src/lib/types.ts for convenience.
 
-export type Status = 'pending' | 'active' | 'completed' | 'overdue';
+export type { Status, Commission, Project, Interaction } from './types';
+
 
 export interface Commission {
   id: string;

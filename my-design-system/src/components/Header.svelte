@@ -8,10 +8,11 @@
     import imgLogo from "../assets/logo.svg";
     import imgText from "../assets/brand-text.svg";
     import PreferenceCenter from "./PreferenceCenter.svelte";
-    import { MockRepository } from "../lib/mock-repository.svelte.ts";
+    import { incrementInteraction } from "../lib/api";
 
     function handleMar9() {
-        MockRepository.incrementMar9Interactions();
+        // fire-and-forget — no UI feedback needed
+        incrementInteraction('Mar 09').catch(console.warn);
     }
 
     onMount(() => {

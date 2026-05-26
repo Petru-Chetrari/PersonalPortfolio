@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { MockRepository } from '../lib/mock-repository.svelte';
+  import { createCommission } from '../lib/api';
 
   const iconWebDev    = '/assets/figma-exports/icon-web-dev.svg';
   const iconLanding   = '/assets/figma-exports/icon-landing.svg';
@@ -25,7 +25,7 @@
     },
   ];
 
-  // ── Commission type options (from mock-repository) ─────────────────────────
+  // ── Commission type options ────────────────────────────────────────────────
   const projectTypes = ['Web App', 'Mobile App', 'Landing Page', 'E-commerce', 'Brand Identity', 'Other'];
 
   // ── Form state ────────────────────────────────────────────────────────────
@@ -44,8 +44,9 @@
   });
 
   // ── UI state ──────────────────────────────────────────────────────────────
-  let submitted  = $state(false);
-  let submitting = $state(false);
+  let submitted   = $state(false);
+  let submitting  = $state(false);
+  let submitError = $state('');
 
   // ── Helpers ───────────────────────────────────────────────────────────────
   function validate(): boolean {
@@ -80,28 +81,26 @@
     e.preventDefault();
     if (!validate()) return;
 
-    submitting = true;
+    submitting  = true;
+    submitError = '';
 
-    // Simulate async processing
-    await new Promise(r => setTimeout(r, 600));
-
-    // Build a commission title from name + project type
-    const title = `${name.trim()}'s ${projectType} Project`;
-
-    const payload = {
-      client: name.trim(),
-      title,
-      appType: projectType,
-      shortDesc: `Commission from ${email.trim()}`,
-      longDesc: details.trim(),
-      budget: budget ? `$${budget}` : undefined,
-    };
-
-    const result = MockRepository.addCommission(payload);
-    console.log('[SubmitCommission] Commission added to MockRepository:', result);
-
-    submitting = false;
-    submitted  = true;
+    try {
+      const title = `${name.trim()}'s ${projectType} Project`;
+      await createCommission({
+        client:    name.trim(),
+        title,
+        appType:   projectType,
+        shortDesc: `Commission from ${email.trim()}`,
+        longDesc:  details.trim(),
+        budget:    budget ? `$${budget}` : undefined,
+      });
+      submitted = true;
+    } catch (err) {
+      submitError = 'Failed to submit your request. Please try again.';
+      console.error('[SubmitCommission]', err);
+    } finally {
+      submitting = false;
+    }
   }
 
   function resetForm() {
@@ -112,6 +111,7 @@
     details     = '';
     errors      = { email: '', name: '', projectType: '', details: '' };
     submitted   = false;
+    submitError = '';
   }
 
   // Active input tracking for focus ring
@@ -319,6 +319,10 @@
               Submit Request
             {/if}
           </button>
+
+          {#if submitError}
+            <p class="sc-error-msg" style="text-align:center">{submitError}</p>
+          {/if}
 
         </form>
       {/if}

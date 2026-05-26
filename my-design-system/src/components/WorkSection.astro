@@ -1,45 +1,6 @@
 ---
 // WorkSection.astro — Figma: "Landing > Base > Body > Section[1]"
-// Pulls project data from mock-repository. Static (no interactivity).
-import { MockRepository } from '../lib/mock-repository.svelte';
-
-// Map the mock commissions to "project cards" for the landing page.
-// The Figma design shows exactly 3 project cards with these Figma-defined projects,
-// so we define them here with the correct Figma asset URLs and pull data from the repo
-// for titles / types. We layer the static Figma content on top of the mock data shape.
-
-// Figma-extracted image assets served from localhost (Figma Dev Mode MCP)
-const imgAura    = 'http://localhost:3845/assets/bee0d7335ba9c7d1cb6f76e9c25452666693add1.png';
-const imgLumina  = 'http://localhost:3845/assets/6f1b17cd4f51a36cd46c36d2ea1d5a33825be961.png';
-const imgNova    = 'http://localhost:3845/assets/9c44f4e01b24f15ff4fb7082364ae55608fb895a.png';
-
-// Static project definitions sourced from Figma (verified against mock-repository types)
-const projects = [
-  {
-    image: imgNova,
-    imageAlt: 'Nova Modern Interface screenshot',
-    type: 'SaaS Platform',
-    title: 'Nova Modern Interface',
-    desc: 'A sleek and minimal interface for a B2B SaaS platform. Emphasis on clear typography, whitespace, and micro-interactions.',
-    tags: ['Next.js', 'TailwindCSS', 'Prisma', 'PostgreSQL'],
-  },
-  {
-    image: imgLumina,
-    imageAlt: 'Lumina Mobile Banking screenshot',
-    type: 'Mobile Design Prototype',
-    title: 'Lumina Mobile Banking',
-    desc: 'A high-fidelity prototype for a modern mobile banking app focusing on user experience and accessibility. Complete with light and dark themes.',
-    tags: ['React Native', 'Expo', 'Zustand', 'Framer Motion'],
-  },
-  {
-    image: imgAura,
-    imageAlt: 'Aura Analytics Dashboard screenshot',
-    type: 'Web Application',
-    title: 'Aura Analytics Dashboard',
-    desc: 'A comprehensive real-time analytics dashboard built with React and Tailwind CSS. Features dark mode, responsive design, and intuitive data visualization.',
-    tags: ['React', 'TypeScript', 'WebSocket', 'Tailwind', 'Recharts'],
-  },
-];
+// Project cards are loaded at runtime from the backend API.
 ---
 
 <section id="work" class="work" aria-labelledby="work-heading">
@@ -52,35 +13,56 @@ const projects = [
     </p>
   </div>
 
-  <!-- 3-column project grid -->
-  <div class="work__grid">
-    {projects.map(({ image, imageAlt, type, title, desc, tags }) => (
-      <article class="project-card">
-        <!-- Thumbnail -->
-        <div class="project-card__thumb">
-          <img src={image} alt={imageAlt} class="project-card__img" loading="lazy" />
-        </div>
-
-        <!-- Body -->
-        <div class="project-card__body">
-          <div class="project-card__meta">
-            <span class="project-card__type">{type}</span>
-            <h3 class="project-card__title">{title}</h3>
-          </div>
-
-          <p class="project-card__desc">{desc}</p>
-
-          <!-- Tech bubbles -->
-          <div class="project-card__tags">
-            {tags.map(tag => (
-              <span class="project-card__tag">{tag}</span>
-            ))}
-          </div>
-        </div>
-      </article>
-    ))}
-  </div>
+  <!-- 3-column project grid — populated by client-side script -->
+  <div id="work-grid" class="work__grid"></div>
 </section>
+
+<script>
+  // Fallback Figma images cycled per project index
+  const FALLBACK_IMGS = [
+    'http://localhost:3845/assets/9c44f4e01b24f15ff4fb7082364ae55608fb895a.png',
+    'http://localhost:3845/assets/6f1b17cd4f51a36cd46c36d2ea1d5a33825be961.png',
+    'http://localhost:3845/assets/bee0d7335ba9c7d1cb6f76e9c25452666693add1.png',
+  ];
+
+  async function loadProjects() {
+    const grid = document.getElementById('work-grid');
+    if (!grid) return;
+
+    try {
+      const res = await fetch('http://localhost:3001/projects?limit=6');
+      if (!res.ok) throw new Error(`${res.status}`);
+      const { data } = await res.json();
+
+      grid.innerHTML = data.map((p: any, i: number) => {
+        const img  = FALLBACK_IMGS[i % FALLBACK_IMGS.length];
+        const tags = (p.tags ?? []).map((t: string) =>
+          `<span class="project-card__tag">${t}</span>`
+        ).join('');
+
+        return `
+          <article class="project-card">
+            <div class="project-card__thumb">
+              <img src="${img}" alt="${p.title} screenshot"
+                   class="project-card__img" loading="lazy" />
+            </div>
+            <div class="project-card__body">
+              <div class="project-card__meta">
+                <span class="project-card__type">${p.appType ?? ''}</span>
+                <h3 class="project-card__title">${p.title}</h3>
+              </div>
+              <p class="project-card__desc">${p.shortDesc ?? ''}</p>
+              <div class="project-card__tags">${tags}</div>
+            </div>
+          </article>`;
+      }).join('');
+    } catch (err) {
+      console.warn('[WorkSection] Could not load projects from API:', err);
+    }
+  }
+
+  document.addEventListener('astro:page-load', loadProjects);
+</script>
 
 <style>
   /* ── Section shell ── */

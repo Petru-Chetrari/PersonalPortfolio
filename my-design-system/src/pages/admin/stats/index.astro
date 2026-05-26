@@ -107,32 +107,40 @@ import Chart from '../../../components/Chart.svelte';
   </div>
 
   <script>
-    import { MockRepository } from '../../../lib/mock-repository.svelte.ts';
+    const API = 'http://localhost:3001';
 
-    function initStats() {
-      const stats = MockRepository.getAdminStats();
+    async function initStats() {
+      let stats;
+      try {
+        const res = await fetch(`${API}/commissions/stats`);
+        if (!res.ok) throw new Error(res.status.toString());
+        stats = await res.json();
+      } catch (err) {
+        console.error('[admin/stats] Failed to load stats:', err);
+        return;
+      }
 
       // Update KPIs
-      const statTotal = document.getElementById('stat-total');
-      const statActive = document.getElementById('stat-active');
+      const statTotal   = document.getElementById('stat-total');
+      const statActive  = document.getElementById('stat-active');
       const statRevenue = document.getElementById('stat-revenue');
 
-      if (statTotal) statTotal.textContent = stats.total.toString();
-      if (statActive) statActive.textContent = stats.active.toString();
+      if (statTotal)   statTotal.textContent   = stats.total.toString();
+      if (statActive)  statActive.textContent  = stats.active.toString();
       if (statRevenue) statRevenue.textContent = '$' + stats.revenue.toLocaleString();
 
       // Update Recent Activity Table
       const tbody = document.getElementById('recent-table-body');
       if (tbody) {
-        const statusConfig: Record<string, {color: string; bg: string}> = {
+        const statusConfig = {
           pending:   { color: '#EAB308', bg: 'rgba(234,179,8,0.15)' },
           active:    { color: '#10B981', bg: 'rgba(16,185,129,0.15)' },
           completed: { color: '#3B82F6', bg: 'rgba(59,130,246,0.15)' },
           overdue:   { color: '#EF4444', bg: 'rgba(239,68,68,0.15)' },
         };
 
-        tbody.innerHTML = stats.recentActivity.map((r: any, i: number) => {
-          const s = statusConfig[r.status];
+        tbody.innerHTML = (stats.recentActivity ?? []).map((r) => {
+          const s = statusConfig[r.status] ?? statusConfig.pending;
           return `
             <tr class="border-t transition-colors duration-150 hover:bg-slate-800/40" style="border-color:#1E293B;">
               <td class="px-6 py-4 text-slate-200 font-medium font-['Segoe_UI',sans-serif] truncate max-w-[200px]">${r.title}</td>
@@ -140,10 +148,11 @@ import Chart from '../../../components/Chart.svelte';
               <td class="px-6 py-4 text-slate-500 text-xs font-['Segoe_UI_Emoji',sans-serif] hidden md:table-cell">${r.date}</td>
               <td class="px-6 py-4">
                 <span class="px-3 py-1.5 rounded-full text-xs font-semibold font-['Segoe_UI',sans-serif]"
-                  style="background-color:${s.bg}; color:${s.color}; border: 1px solid ${s.color}30;">${r.status.charAt(0).toUpperCase() + r.status.slice(1)}</span>
+                  style="background-color:${s.bg}; color:${s.color}; border: 1px solid ${s.color}30;">
+                  ${r.status.charAt(0).toUpperCase() + r.status.slice(1)}
+                </span>
               </td>
-            </tr>
-          `;
+            </tr>`;
         }).join('');
       }
     }

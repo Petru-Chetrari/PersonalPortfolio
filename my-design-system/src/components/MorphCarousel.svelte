@@ -1,15 +1,76 @@
 <script lang="ts">
-  import { onMount, tick } from "svelte";
+  import { onMount, onDestroy, tick } from "svelte";
   import { fly } from "svelte/transition";
-  import { expoOut, backOut } from "svelte/easing";
+  import {  backOut } from "svelte/easing";
+  import { Spring } from "svelte/motion";
   import { prepareWithSegments, layoutWithLines } from "@chenglou/pretext";
   import type { Project } from "../lib/mock-repository.svelte";
 
   export let projects: Project[] = [];
   let currentIndex = 0;
   let direction = 1;
-  let isAnimating = false;
   let prefersReducedMotion = false;
+
+  // ── Image Stack of Papers (Sliding Window DOM) ──
+  interface Slide {
+    id: number;
+    index: number;
+    zIndex: number;
+    y: Spring<number>;
+  }
+  let visibleSlides: Slide[] = [];
+  let slideIdCounter = 0;
+  let stackCounter = 0; // monotonic z-index counter
+
+  function initStack() {
+    if (projects.length === 0) return;
+    const s = new Spring(0, { stiffness: 0.12, damping: 0.7 });
+    visibleSlides = [{ id: ++slideIdCounter, index: currentIndex, zIndex: ++stackCounter, y: s }];
+    displayTags = projects[currentIndex].tags;
+  }
+
+  // ── Tech Pills (Debounced Odometer Queue) ──
+  let pillQueue: string[][] = [];
+  let isPillAnimating = false;
+  let spamTimer: ReturnType<typeof setTimeout> | null = null;
+  let displayTags: string[] = [];
+  let pillKey = 0; // drives {#key} to re-trigger fly transitions
+
+  function queuePills(tags: string[]) {
+    pillQueue.push(tags);
+    
+    if (spamTimer) clearTimeout(spamTimer);
+    spamTimer = setTimeout(() => {
+      // Spam timer expired (debounce): flush queue and snap to absolute final target array
+      if (pillQueue.length > 0 || displayTags !== projects[currentIndex].tags) {
+        pillQueue = [];
+        displayTags = projects[currentIndex].tags;
+        pillKey++;
+        isPillAnimating = true;
+        setTimeout(() => { isPillAnimating = false; processPillQueue(); }, 400); // Wait for final transition
+      }
+    }, 400);
+
+    if (!isPillAnimating) {
+      processPillQueue();
+    }
+  }
+
+  function processPillQueue() {
+    if (pillQueue.length === 0) {
+      isPillAnimating = false;
+      return;
+    }
+    
+    isPillAnimating = true;
+    displayTags = pillQueue.shift()!;
+    pillKey++;
+    
+    // Mechanical odometer pace
+    setTimeout(() => {
+      processPillQueue();
+    }, 450);
+  }
 
   $: currentProject = projects[currentIndex] || null;
 
@@ -40,18 +101,68 @@
   let glyphs: GlyphState[] = [];
   let animationFrame: number;
   let cssVars = { accent: "#f43f5e", primary: "#ffffff", secondary: "#a1a1aa" };
+  let morphId = 0;
+
+  let cullTimer: ReturnType<typeof setTimeout> | null = null;
+  function scheduleCull() {
+    if (cullTimer) clearTimeout(cullTimer);
+    cullTimer = setTimeout(() => {
+      // Once tweens finish, cull invisible slides to prevent DOM bloat
+      const currentSlide = visibleSlides.find(s => s.index === currentIndex);
+      if (currentSlide) {
+        visibleSlides = [currentSlide];
+      }
+    }, 900);
+  }
 
   function next() {
-    if (projects.length === 0 || isAnimating) return;
+    if (projects.length === 0) return;
     direction = 1;
     currentIndex = (currentIndex + 1) % projects.length;
+
+    // Next (Forward): Append new image with a higher z-index
+    const s = new Spring(-100, { stiffness: 0.12, damping: 0.7 });
+    const newSlide = { id: ++slideIdCounter, index: currentIndex, zIndex: ++stackCounter, y: s };
+    visibleSlides = [...visibleSlides, newSlide];
+    
+    // Tween its translateY from -100% down to 0%
+    s.target = 0;
+    scheduleCull();
+
+    queuePills(projects[currentIndex].tags);
     if (!prefersReducedMotion) triggerMorph();
   }
 
-  function prev() {
-    if (projects.length === 0 || isAnimating) return;
+  async function prev() {
+    if (projects.length === 0) return;
     direction = -1;
     currentIndex = (currentIndex - 1 + projects.length) % projects.length;
+
+    // Prev (Backward): Dynamically prepend target older image with lower z-index
+    const bottomZ = Math.min(...visibleSlides.map(s => s.zIndex), stackCounter) - 1;
+    const underneath = new Spring(0, { stiffness: 0.12, damping: 0.7 });
+    const newSlide = { id: ++slideIdCounter, index: currentIndex, zIndex: bottomZ, y: underneath };
+    
+    visibleSlides = [newSlide, ...visibleSlides];
+
+    // Wait for the DOM to spawn the new image underneath before animating top image off
+    await tick();
+
+    // Tween the current top image's translateY from 0% up to -100%
+    const topSlide = visibleSlides.reduce((highest, slide) => {
+      if (slide.id === newSlide.id) return highest;
+      if (!highest || slide.zIndex > highest.zIndex) return slide;
+      return highest;
+    }, null as Slide | null);
+
+    if (topSlide) {
+      topSlide.y.target = -100;
+      scheduleCull();
+    } else {
+      scheduleCull();
+    }
+
+    queuePills(projects[currentIndex].tags);
     if (!prefersReducedMotion) triggerMorph();
   }
 
@@ -71,44 +182,7 @@
     }
   }
 
-  // --- Svelte Transitions (Layer 0 Image) ---
-  function slideIn(node: HTMLElement, { duration = DURATION }) {
-    if (prefersReducedMotion)
-      return { duration, css: (t: number) => `opacity: ${t};` };
-    return {
-      duration,
-      css: (t: number) => {
-        const easedU = expoOut(1 - t);
-        if (direction === 1)
-          return `transform: translateY(${easedU * -100}%); z-index: 2;`;
-        return `transform: translateY(0%); z-index: 1;`;
-      },
-    };
-  }
 
-  function slideOut(node: HTMLElement, { duration = DURATION }) {
-    if (prefersReducedMotion)
-      return { duration, css: (t: number) => `opacity: ${t};` };
-    return {
-      duration,
-      css: (t: number) => {
-        const easedU = expoOut(1 - t);
-        if (direction === 1) return `transform: translateY(0%); z-index: 1;`;
-        return `transform: translateY(${easedU * -100}%); z-index: 2;`;
-      },
-    };
-  }
-
-  function fadeSlide(node: HTMLElement, { duration = DURATION }) {
-    return {
-      duration,
-      css: (t: number) => {
-        const easedT = expoOut(t);
-        const yOffset = direction === 1 ? 10 : -10;
-        return `opacity: ${easedT}; transform: translateY(${(1 - easedT) * yOffset}px);`;
-      },
-    };
-  }
 
   // --- Layer 2: Pretext Logic Layer ---
   function computeLayout(project: Project) {
@@ -171,11 +245,15 @@
 
   // --- Morphing Engine ---
   async function triggerMorph() {
-    isAnimating = true;
+    const currentId = ++morphId;
     
     // Wait for Svelte to update the Semantic DOM so we can measure the NEW layout's bounding boxes
     await tick();
     
+    // If a newer morph was triggered while we were waiting for the DOM tick, abort this one!
+    if (currentId !== morphId) return;
+
+    cancelAnimationFrame(animationFrame);
     const newLayout = computeLayout(projects[currentIndex]);
 
     const oldGlyphs = [...glyphs];
@@ -200,13 +278,13 @@
       } else if (oldG && !newG) {
         glyphs.push({
           ...oldG,
-          targetX: oldG.x,
-          targetY: oldG.y,
+          targetX: oldG.targetX || oldG.x,
+          targetY: oldG.targetY || oldG.y,
           targetOpacity: 0,
           isMapped: false,
-          vx: (Math.random() - 0.5) * 4,
-          vy: Math.random() * 5 + 2,
-          mass: Math.random() * 0.5 + 0.5,
+          vx: oldG.isMapped ? (Math.random() - 0.5) * 4 : oldG.vx,
+          vy: oldG.isMapped ? Math.random() * 5 + 2 : oldG.vy,
+          mass: oldG.isMapped ? Math.random() * 0.5 + 0.5 : oldG.mass,
         });
       } else if (!oldG && newG) {
         glyphs.push({
@@ -263,7 +341,6 @@
       if (t < 1 || glyphs.some((g) => !g.isMapped && g.opacity > 0)) {
         animationFrame = requestAnimationFrame(renderFrame);
       } else {
-        isAnimating = false;
         glyphs.forEach((g) => {
           if (g.isMapped) {
             g.x = g.targetX;
@@ -275,7 +352,6 @@
       }
     }
 
-    cancelAnimationFrame(animationFrame);
     animationFrame = requestAnimationFrame(renderFrame);
   }
 
@@ -298,6 +374,7 @@
       "(prefers-reduced-motion: reduce)",
     ).matches;
     extractCSSVars();
+    initStack();
 
     const ro = new ResizeObserver(() => {
       if (!container || !canvas) return;
@@ -336,6 +413,11 @@
       ro.disconnect();
       cancelAnimationFrame(animationFrame);
     };
+  });
+
+  onDestroy(() => {
+    if (spamTimer) clearTimeout(spamTimer);
+    if (cullTimer) clearTimeout(cullTimer);
   });
 </script>
 
@@ -389,21 +471,20 @@
 
   {#if currentProject}
     <div class="carousel-content">
-      <!-- 1. The Image Viewport (Animated) -->
+      <!-- 1. The Image Viewport (Spring-Driven Stack of Papers) -->
       <div class="image-viewport">
-        {#key currentIndex}
+        {#each visibleSlides as entry (entry.id)}
           <div
             class="image-layer will-change-transform"
-            in:slideIn
-            out:slideOut
+            style="transform: translateY({entry.y.current}%); z-index: {entry.zIndex};"
           >
             <img
-              src={currentProject.image}
-              alt={currentProject.imageAlt || currentProject.title}
+              src={projects[entry.index]?.image}
+              alt={projects[entry.index]?.imageAlt || projects[entry.index]?.title}
               class="slide-image"
             />
           </div>
-        {/key}
+        {/each}
       </div>
 
       <!-- 2. The Text Viewport (Tri-Layer Canvas Setup) -->
@@ -422,16 +503,15 @@
               {currentProject.desc}
             </p>
 
-            <!-- Tags are fully DOM-rendered so they maintain CSS styling/backgrounds -->
-            <!-- Odometer/Cassette animation for tags -->
+            <!-- Tags: Debounced Split-Flap Odometer -->
             <div class="slide-tags mt-auto">
-              {#each currentProject.tags as tag, i (i)}
+              {#each displayTags as tag, i (i)}
                 <div class="pill-slot">
-                  {#key currentIndex + "-" + tag}
+                  {#key pillKey + '-' + tag}
                     <span
                       class="slide-tag"
-                      in:fly={{ y: -20, duration: 400, delay: (i * 50) + 100, easing: backOut }}
-                      out:fly={{ y: 20, duration: 300, delay: i >= currentProject.tags.length ? 0 : (i * 50), easing: backOut }}
+                      in:fly={{ y: -20, duration: 400, delay: (i * 50) + 100, easing: backOut, opacity: 1 }}
+                      out:fly={{ y: 20, duration: 300, delay: (i * 50), easing: backOut, opacity: 1 }}
                     >
                       {tag}
                     </span>
@@ -679,6 +759,9 @@
     display: grid;
     overflow: hidden;
     border-radius: var(--radius-full);
+    /* Fix 2px white border leak: shrink the mask by 1px on each side */
+    margin: -1px;
+    padding: 1px;
   }
 
   .slide-tag {
@@ -689,6 +772,7 @@
     padding: var(--space-2) var(--space-4);
     background-color: var(--color-bg-base);
     border: var(--border-thin) solid var(--color-border);
+    border-radius: var(--radius-full);
     font-family: var(--font-ui);
     font-size: var(--text-sm);
     font-weight: var(--weight-semibold);

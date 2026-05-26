@@ -1,0 +1,12 @@
+Daily Tasks:
+- Exercise
+- Read new AGENTS.md File
+
+Project Goals:
+- Build a Todo List App with Code Generation
+- Optimize Performance by 30%
+- Implement Unit Tests for Core Features
+
+Personal Notes:
+- Review Svelte Store Patterns
+- Schedule Catchup Call with Mentor

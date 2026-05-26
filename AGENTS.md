@@ -3,7 +3,10 @@
 
 **IMPORTANT: This project has a knowledge graph. ALWAYS use the
 code-review-graph MCP tools BEFORE using Grep/Glob/Read to explore
-the codebase.** The graph is faster, cheaper (fewer tokens), and gives
+the codebase. Do not use npm. The code-review-graph tool is a Python 
+executable located at
+"C:\\Users\\Marquis de Sade\\.platformio\\penv\\Scripts\\code-review-graph.exe"** 
+The graph is faster, cheaper (fewer tokens), and gives
 you structural context (callers, dependents, test coverage) that file
 scanning cannot.
 

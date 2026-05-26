@@ -52,18 +52,18 @@ import AdminDashboard from '../../../layouts/AdminDashboard.astro';
   </div>
 
   <script>
-    import { MockRepository, type Commission, type Status } from '../../../lib/mock-repository.svelte.ts';
+    const API = 'http://localhost:3001';
 
-    const statusConfig: Record<Status, {label: string; color: string; bg: string; dot: string}> = {
+    const statusConfig = {
       pending:   { label: 'Pending',   color: '#FFB900', bg: 'rgba(255,185,0,0.1)',   dot: '#FFB900' },
       active:    { label: 'Active',    color: '#00BC7D', bg: 'rgba(0,188,125,0.1)',   dot: '#00BC7D' },
       completed: { label: 'Completed', color: '#3B82F6', bg: 'rgba(59,130,246,0.1)',  dot: '#3B82F6' },
       overdue:   { label: 'Overdue',   color: '#FF2056', bg: 'rgba(255,32,86,0.1)',   dot: '#FF2056' },
     };
 
-    function renderRow(c: Commission): string {
-      const s = statusConfig[c.status];
-      
+    function renderRow(c) {
+      const s = statusConfig[c.status] ?? statusConfig.pending;
+
       let actionBtn = '';
       if (c.status === 'pending') {
         actionBtn = `<button class="action-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors border border-emerald-500/20 font-['Segoe_UI',sans-serif] shrink-0" data-id="${c.id}" data-action="active">Approve</button>`;
@@ -73,10 +73,7 @@ import AdminDashboard from '../../../layouts/AdminDashboard.astro';
 
       return `
         <div class="commission-row flex items-center gap-4 rounded-2xl px-5 py-4 transition-colors duration-150 hover:brightness-110"
-          data-status="${c.status}"
-          style="background-color: #1E293B; border: 1px solid #334155;">
-          
-          <!-- ID + title -->
+          data-status="${c.status}" style="background-color:#1E293B; border:1px solid #334155;">
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2 flex-wrap">
               <span class="text-xs font-mono text-slate-500 font-['Segoe_UI_Emoji',sans-serif]">${c.id}</span>
@@ -90,78 +87,91 @@ import AdminDashboard from '../../../layouts/AdminDashboard.astro';
               <span class="text-xs text-slate-500 font-['Segoe_UI_Emoji',sans-serif]">${c.appType}</span>
             </div>
           </div>
-
-          <!-- Dates -->
           <div class="hidden md:flex flex-col items-end gap-1 shrink-0">
             <span class="text-xs text-slate-500 font-['Segoe_UI_Emoji',sans-serif]">Submitted ${c.date}</span>
             <span class="text-xs text-slate-400 font-['Segoe_UI_Emoji',sans-serif]">Due ${c.dueDate}</span>
           </div>
-
-          <!-- Status badge -->
           <div class="shrink-0 flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold font-['Segoe_UI',sans-serif]"
-            style="background-color: ${s.bg}; color: ${s.color}; border: 1px solid ${s.color}33;">
-            <span class="w-1.5 h-1.5 rounded-full inline-block" style="background-color: ${s.dot};"></span>
+            style="background-color:${s.bg}; color:${s.color}; border:1px solid ${s.color}33;">
+            <span class="w-1.5 h-1.5 rounded-full inline-block" style="background-color:${s.dot};"></span>
             ${s.label}
           </div>
-
-          ${actionBtn || `<svg class="shrink-0 text-slate-600" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="#64748B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`}
-        </div>
-      `;
+          ${actionBtn || `<svg class="shrink-0" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="#64748B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`}
+        </div>`;
     }
 
-    function initAdminCommissions() {
+    async function initAdminCommissions() {
       const list = document.getElementById('commission-list');
       if (!list) return;
 
       let currentFilter = 'all';
+      let allCommissions = [];
 
-      const renderList = () => {
-        const commissions = MockRepository.getCommissions();
-        const empty = document.getElementById('empty-state')!;
-        const filtered = currentFilter === 'all' ? commissions : commissions.filter(c => c.status === currentFilter);
+      // Fetch from backend and re-render
+      async function fetchAndRender() {
+        try {
+          const res = await fetch(`${API}/commissions?limit=100`);
+          if (!res.ok) throw new Error(res.status.toString());
+          allCommissions = (await res.json()).data;
+        } catch (err) {
+          console.error('[admin/commissions] fetch failed:', err);
+          return;
+        }
+        renderList();
+      }
+
+      function renderList() {
+        const empty = document.getElementById('empty-state');
+        const filtered = currentFilter === 'all'
+          ? allCommissions
+          : allCommissions.filter(c => c.status === currentFilter);
 
         if (filtered.length === 0) {
           list.innerHTML = '';
-          empty.classList.remove('hidden');
+          empty?.classList.remove('hidden');
         } else {
-          empty.classList.add('hidden');
+          empty?.classList.add('hidden');
           list.innerHTML = filtered.map(renderRow).join('');
-          
-          // Attach action listeners
-          list.querySelectorAll<HTMLButtonElement>('.action-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+
+          list.querySelectorAll('.action-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
               e.stopPropagation();
-              const id = btn.dataset.id!;
-              const newStatus = btn.dataset.action as Status;
-              
-              MockRepository.updateCommissionStatus(id, newStatus);
-              renderList(); // re-render instantly!
+              const id       = btn.dataset.id;
+              const newStatus = btn.dataset.action;
+              try {
+                await fetch(`${API}/commissions/${encodeURIComponent(id)}/status`, {
+                  method:  'PATCH',
+                  headers: { 'Content-Type': 'application/json' },
+                  body:    JSON.stringify({ status: newStatus }),
+                });
+                await fetchAndRender();
+              } catch (err) {
+                console.error('[admin/commissions] status update failed:', err);
+              }
             });
           });
         }
-      };
+      }
 
-      // Filter button logic
-      const filterBtns = document.querySelectorAll<HTMLButtonElement>('.filter-btn');
-      filterBtns.forEach(btn => {
-        const newBtn = btn.cloneNode(true) as HTMLButtonElement;
-        btn.parentNode?.replaceChild(newBtn, btn);
-
-        newBtn.addEventListener('click', () => {
-          document.querySelectorAll<HTMLButtonElement>('.filter-btn').forEach(b => {
+      // Filter button wiring
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        const fresh = btn.cloneNode(true);
+        btn.parentNode?.replaceChild(fresh, btn);
+        fresh.addEventListener('click', () => {
+          document.querySelectorAll('.filter-btn').forEach(b => {
             b.style.backgroundColor = '#1E293B';
             b.style.color = '#94A3B8';
             b.style.border = '1px solid #334155';
           });
-          newBtn.style.backgroundColor = '#3B82F6';
-          newBtn.style.color = '#fff';
-          newBtn.style.border = 'none';
-          currentFilter = newBtn.dataset.filter!;
+          fresh.style.backgroundColor = '#3B82F6';
+          fresh.style.color = '#fff';
+          fresh.style.border = 'none';
+          currentFilter = fresh.dataset.filter;
           renderList();
         });
       });
 
-      renderList();
+      await fetchAndRender();
     }
 
     document.addEventListener('astro:page-load', initAdminCommissions);

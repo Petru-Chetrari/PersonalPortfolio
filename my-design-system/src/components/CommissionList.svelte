@@ -1,14 +1,23 @@
 <script lang="ts">
-  import type { Commission } from '../lib/mock-repository.svelte.ts';
+  import { onMount } from 'svelte';
+  import type { Commission } from '../lib/types.ts';
+  import { listCommissions } from '../lib/api.ts';
 
-  interface Props {
-    data: Commission[];
-  }
+  let data    = $state<Commission[]>([]);
+  let loading = $state(true);
+  let error   = $state('');
 
-  let { data: rawData }: Props = $props();
-
-  // Figma shows exactly 2 commissions in the list panel
-  const data = $derived(rawData.slice(0, 2));
+  onMount(async () => {
+    try {
+      const result = await listCommissions({ limit: 50 });
+      data = result.data;
+    } catch (err) {
+      error = 'Could not load commissions. Is the server running?';
+      console.error('[CommissionList]', err);
+    } finally {
+      loading = false;
+    }
+  });
 
   function formatDate(iso: string): string {
     const d = new Date(iso);
@@ -28,19 +37,27 @@
     { from: 'client',    sender: 'You',       time: '09:15 AM', text: 'Awesome! Please make sure to include the new variant selector we discussed.' },
   ];
 
-  let selected = $state<Commission | null>(data[0] ?? null);
+  // Auto-select first commission once data arrives
+  let selected = $state<Commission | null>(null);
+  $effect(() => { if (data.length && !selected) selected = data[0]; });
+
   let messageText = $state('');
 
   function selectCommission(c: Commission) { selected = c; }
   function sendMessage() { messageText = ''; }
 </script>
 
-<!-- ─── Page heading (Figma: ClientDashboard › Container, y:32, 30px Bold #f8fafc) ─── -->
+<!-- ─── Page heading ─────────────────────────────────────────────────────────────── -->
 <div class="page-header">
   <h1 class="page-title">Client Portal</h1>
   <p class="page-subtitle">Manage your commissions and communicate directly with the developer.</p>
 </div>
 
+{#if loading}
+  <div class="portal-loading">Loading commissions…</div>
+{:else if error}
+  <div class="portal-error">{error}</div>
+{:else}
 <!-- ─── Two-panel card ─────────────────────────────────────────────────────────────── -->
 <div class="portal-card">
 
@@ -169,9 +186,25 @@
     {/if}
   </section>
 </div>
+{/if}
 
 <style>
-  /* ── Page heading ─────────────────────────────────────────── */
+  /* ── Loading / error states ────────────────────────────── */
+  .portal-loading,
+  .portal-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    border-radius: var(--radius-2xl);
+    border: var(--border-thin) solid var(--color-border);
+  }
+  .portal-loading { color: var(--color-text-secondary); }
+  .portal-error   { color: #FF2056; background: rgba(255,32,86,0.05); }
+
+  /* ── Page heading ──────────────────────────────────── */
   .page-header {
     display: flex;
     flex-direction: column;

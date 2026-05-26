@@ -1,26 +1,31 @@
 <script>
-    import { onDestroy } from "svelte";
+    import { onDestroy, onMount } from "svelte";
     import Chart from "chart.js/auto";
-    import { MockRepository } from "../lib/mock-repository.svelte.ts";
+    import { listInteractions } from "../lib/api.ts";
 
     let canvasElement = $state();
     let chartInstance;
 
-    $effect(() => {
-        if (!canvasElement) return;
+    onMount(async () => {
+        try {
+            const result = await listInteractions({ limit: 30 });
+            const interactions = result.data;
 
-        const agg = MockRepository.getChartAggregations();
-        
-        if (!chartInstance) {
+            const labels   = interactions.map(i => i.date);
+            const projects = interactions.map(i => i.projects);
+            const links    = interactions.map(i => i.links);
+
+            if (!canvasElement) return;
+
             chartInstance = new Chart(canvasElement, {
                 type: "line",
                 data: {
-                    labels: agg.labels,
+                    labels,
                     datasets: [
                         {
                             label: "Projects",
-                            data: agg.projects,
-                            borderColor: "#3B82F6", // Blue
+                            data: projects,
+                            borderColor: "#3B82F6",
                             backgroundColor: "#3B82F6",
                             borderWidth: 3,
                             pointBackgroundColor: "#3B82F6",
@@ -32,8 +37,8 @@
                         },
                         {
                             label: "Links",
-                            data: agg.links,
-                            borderColor: "#EAB308", // Yellow
+                            data: links,
+                            borderColor: "#EAB308",
                             backgroundColor: "#EAB308",
                             borderWidth: 3,
                             pointBackgroundColor: "#EAB308",
@@ -49,11 +54,7 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     animation: { duration: 400 },
-                    plugins: {
-                        legend: {
-                            display: false,
-                        }
-                    },
+                    plugins: { legend: { display: false } },
                     scales: {
                         y: {
                             beginAtZero: true,
@@ -67,18 +68,13 @@
                     }
                 },
             });
-        } else {
-            chartInstance.data.labels = agg.labels;
-            chartInstance.data.datasets[0].data = agg.projects;
-            chartInstance.data.datasets[1].data = agg.links;
-            chartInstance.update();
+        } catch (err) {
+            console.error('[Chart] Failed to load interactions:', err);
         }
     });
 
     onDestroy(() => {
-        if (chartInstance) {
-            chartInstance.destroy();
-        }
+        if (chartInstance) chartInstance.destroy();
     });
 </script>
 
@@ -93,3 +89,4 @@
         width: 100%;
     }
 </style>
+
