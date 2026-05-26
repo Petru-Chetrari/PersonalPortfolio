@@ -1,79 +1,84 @@
-import { store } from '../store/memory.store';
+import { AppDataSource } from '../data-source';
+import { InteractionEntity } from '../entities/Interaction';
 import type { Interaction, InteractionCreate, InteractionUpdate, InteractionIncrement } from '../models/interaction.model';
 import type { PaginatedResult } from './commission.service';
 
-function paginate<T>(items: T[], page: number, limit: number): PaginatedResult<T> {
-  const total = items.length;
-  const totalPages = Math.ceil(total / limit) || 1;
-  const start = (page - 1) * limit;
-  return { data: items.slice(start, start + limit), total, page, limit, totalPages };
-}
-
 export const InteractionService = {
-  list(page = 1, limit = 10): PaginatedResult<Interaction> {
-    return paginate([...store.interactions.values()], page, limit);
-  },
+  async list(page = 1, limit = 10): Promise<PaginatedResult<Interaction>> {
+    const repo = AppDataSource.getRepository(InteractionEntity);
+    const [entities, total] = await repo.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { date: 'DESC' },
+    });
 
-  getByDate(date: string): Interaction | null {
-    return store.interactions.get(date) ?? null;
-  },
-
-  /** Returns null if date already exists (caller should respond 409). */
-  create(payload: InteractionCreate): Interaction | null {
-    if (store.interactions.has(payload.date)) return null;
-    const entry: Interaction = { ...payload };
-    store.interactions.set(payload.date, entry);
-    return entry;
-  },
-
-  /** Returns null if date not found (caller should respond 404). */
-  update(date: string, payload: InteractionUpdate): Interaction | null {
-    const existing = store.interactions.get(date);
-    if (!existing) return null;
-    const updated: Interaction = {
-      ...existing,
-      ...(payload.links !== undefined && { links: payload.links }),
-      ...(payload.projects !== undefined && { projects: payload.projects }),
-      ...(payload.commissions !== undefined && { commissions: payload.commissions }),
+    return {
+      data: entities,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit) || 1,
     };
-    store.interactions.set(date, updated);
-    return updated;
   },
 
-  /**
-   * Generalisation of incrementMar9Interactions from the mock repository.
-   * Upserts the entry: increments counters if existing, creates with delta values if new.
-   * Defaults: links += 10, projects += 1, commissions += 1.
-   */
-  increment(date: string, deltas: InteractionIncrement): Interaction {
+  async getByDate(date: string): Promise<Interaction | null> {
+    const repo = AppDataSource.getRepository(InteractionEntity);
+    return await repo.findOneBy({ date });
+  },
+
+  async create(payload: InteractionCreate): Promise<Interaction | null> {
+    const repo = AppDataSource.getRepository(InteractionEntity);
+    const existing = await repo.findOneBy({ date: payload.date });
+    if (existing) return null;
+
+    const entity = repo.create(payload);
+    await repo.save(entity);
+    return entity;
+  },
+
+  async update(date: string, payload: InteractionUpdate): Promise<Interaction | null> {
+    const repo = AppDataSource.getRepository(InteractionEntity);
+    const entity = await repo.findOneBy({ date });
+    if (!entity) return null;
+
+    if (payload.links !== undefined) entity.links = payload.links;
+    if (payload.projects !== undefined) entity.projects = payload.projects;
+    if (payload.commissions !== undefined) entity.commissions = payload.commissions;
+
+    await repo.save(entity);
+    return entity;
+  },
+
+  async increment(date: string, deltas: InteractionIncrement): Promise<Interaction> {
+    const repo = AppDataSource.getRepository(InteractionEntity);
+    
     const dLinks = deltas.links ?? 10;
     const dProjects = deltas.projects ?? 1;
     const dCommissions = deltas.commissions ?? 1;
 
-    const existing = store.interactions.get(date);
-    if (existing) {
-      const updated: Interaction = {
-        ...existing,
-        links: existing.links + dLinks,
-        projects: existing.projects + dProjects,
-        commissions: existing.commissions + dCommissions,
-      };
-      store.interactions.set(date, updated);
-      return updated;
+    // We can use a transaction or just an atomic update if SQLite supported it easily.
+    // For simplicity, we find and save.
+    let entity = await repo.findOneBy({ date });
+    if (entity) {
+      entity.links += dLinks;
+      entity.projects += dProjects;
+      entity.commissions += dCommissions;
+    } else {
+      entity = repo.create({
+        date,
+        links: dLinks,
+        projects: dProjects,
+        commissions: dCommissions,
+      });
     }
 
-    // Upsert: create with delta as initial values
-    const newEntry: Interaction = {
-      date,
-      links: dLinks,
-      projects: dProjects,
-      commissions: dCommissions,
-    };
-    store.interactions.set(date, newEntry);
-    return newEntry;
+    await repo.save(entity);
+    return entity;
   },
 
-  remove(date: string): boolean {
-    return store.interactions.delete(date);
+  async remove(date: string): Promise<boolean> {
+    const repo = AppDataSource.getRepository(InteractionEntity);
+    const result = await repo.delete(date);
+    return (result.affected ?? 0) > 0;
   },
 };

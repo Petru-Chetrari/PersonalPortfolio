@@ -6,11 +6,18 @@
     "dev": "ts-node src/index.ts",
     "build": "tsc",
     "test": "jest",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "typeorm": "typeorm-ts-node-commonjs",
+    "migration:generate": "npm run typeorm migration:generate -- -d src/data-source.ts src/migrations/InitialSchema",
+    "migration:run": "npm run typeorm migration:run -- -d src/data-source.ts"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^5.0.1",
+    "msnodesqlv8": "^5.2.0",
+    "mssql": "^12.5.4",
+    "reflect-metadata": "^0.2.2",
+    "typeorm": "^0.3.20",
     "uuid": "^9.0.1",
     "zod": "^3.22.4"
   },
