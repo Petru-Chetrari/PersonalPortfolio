@@ -1,53 +1,38 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { validateProject, type ValidationErrors } from '../lib/validation';
+  import { listProjects, createProject, updateProject, deleteProjectAPI } from '../lib/api';
   import imgImageAuraAnalyticsDashboard from '../assets/aura-dashboard.svg?url';
 
   // ─── Project Data ──────────────────────────────────────────────
-  const projects = $state([
-    {
-      id: 1,
-      title: "Aura Analytics Dashboard",
-      appType: "Web Application",
-      shortDesc:
-        "A comprehensive real-time analytics dashboard built with React and Tailwind CSS. Features dark mode, responsive design, and intuitive data visualization.",
-      longDesc:
-        "The Aura Analytics Dashboard was conceived from the need to visualize complex datasets in real-time without compromising on performance or user experience. The primary challenge was handling high-frequency data streams while maintaining a smooth, 60fps interface.\n\nWe implemented a custom data aggregation layer that batches updates, combined with highly optimized React components using memoization techniques. The result is a dashboard that can process thousands of data points per second while remaining completely responsive. The design language focuses on high contrast and clarity, using a dark theme to reduce eye strain for users who monitor these dashboards for hours at a time.",
-      photo: imgImageAuraAnalyticsDashboard,
-      tags: ["React", "TypeScript", "Tailwind", "Recharts", "WebSocket"],
-    },
-    {
-      id: 2,
-      title: "Lumina Mobile Banking",
-      appType: "Mobile Design Prototype",
-      shortDesc:
-        "A complete mobile banking interface focusing on clean typography, intuitive interactions, and accessible financial tools.",
-      longDesc:
-        "Lumina Mobile Banking solves complex user flows with simplified micro-interactions and high-contrast, easy-to-read financial overviews. Accessibility was a core principle from day one, ensuring every feature met WCAG AA standards.",
-      photo: imgImageAuraAnalyticsDashboard,
-      tags: ["Figma", "UI/UX", "Prototyping"],
-    },
-    {
-      id: 3,
-      title: "Nova Modern Interface",
-      appType: "SaaS Platform",
-      shortDesc:
-        "A scalable design system and interface library for B2B SaaS applications.",
-      longDesc:
-        "Nova provides a robust set of accessible components designed for dense data layouts typical in SaaS platforms. Built with composability in mind, each component is self-contained and themeable.",
-      photo: imgImageAuraAnalyticsDashboard,
-      tags: ["React", "Storybook", "Accessibility"],
-    },
-  ]);
+  let projects = $state<any[]>([]);
+  let selectedProject = $state<any>(null);
 
-  // ─── Selection ─────────────────────────────────────────────────
-  let selectedProject = $state(projects[0]);
+  onMount(async () => {
+    try {
+      const res = await listProjects({ limit: 100 });
+      projects = res.data.map(p => ({
+        ...p,
+        // Add UI-friendly aliases used by the form bindings and validation
+        appType: p.type,
+        shortDesc: p.desc,
+        longDesc: p.desc,
+        photo: p.image || imgImageAuraAnalyticsDashboard,
+      }));
+      if (projects.length > 0) {
+        selectedProject = projects[0];
+      }
+    } catch (err) {
+      console.error('Failed to load projects:', err);
+    }
+  });
 
   // ─── Edit / Add State ──────────────────────────────────────────
   let isEditing = $state(false);
   let isAddingNew = $state(false);
 
-  let editedProject = $state({ ...projects[0] });
-  let editedTagsString = $state(projects[0].tags.join(", "));
+  let editedProject = $state<any>({});
+  let editedTagsString = $state("");
 
   // Validation errors — keyed by field name
   let errors = $state({ title: false, shortDesc: false, appType: false });
@@ -90,7 +75,7 @@
 
   function startAddNew() {
     editedProject = {
-      id: Date.now(),
+      id: crypto.randomUUID(), // Temp ID until server returns real one
       title: "",
       appType: "",
       shortDesc: "",
@@ -104,7 +89,7 @@
     isEditing = true;
   }
 
-  function saveEdit() {
+  async function saveEdit() {
     if (!validate()) return; // Guard: stop if invalid
 
     const parsedTags = editedTagsString
@@ -112,22 +97,49 @@
       .map((t) => t.trim())
       .filter(Boolean);
 
-    if (isAddingNew) {
-      // Push new project to the top of the list
-      const newProject = { ...editedProject, tags: parsedTags };
-      projects.unshift(newProject);
-      selectedProject = projects[0];
-    } else {
-      // Update existing
-      const idx = projects.findIndex((p) => p.id === selectedProject.id);
-      if (idx !== -1) {
-        projects[idx] = { ...editedProject, tags: parsedTags };
-        selectedProject = projects[idx];
-      }
-    }
+    const payload = {
+      title: editedProject.title,
+      type: editedProject.appType,
+      desc: editedProject.shortDesc,
+      image: editedProject.photo,
+      imageAlt: `${editedProject.title} screenshot`,
+      tags: parsedTags
+    };
 
-    isEditing = false;
-    isAddingNew = false;
+    try {
+      if (isAddingNew) {
+        const newProj = await createProject(payload);
+        const mapped = {
+          ...newProj,
+          appType: newProj.type,
+          shortDesc: newProj.desc,
+          longDesc: newProj.desc,
+          photo: newProj.image || imgImageAuraAnalyticsDashboard,
+        };
+        projects.unshift(mapped);
+        selectedProject = projects[0];
+      } else {
+        const updatedProj = await updateProject(selectedProject.id, payload);
+        const mapped = {
+          ...updatedProj,
+          appType: updatedProj.type,
+          shortDesc: updatedProj.desc,
+          longDesc: updatedProj.desc,
+          photo: updatedProj.image || imgImageAuraAnalyticsDashboard,
+        };
+        const idx = projects.findIndex((p) => p.id === selectedProject.id);
+        if (idx !== -1) {
+          projects[idx] = mapped;
+          selectedProject = projects[idx];
+        }
+      }
+
+      isEditing = false;
+      isAddingNew = false;
+    } catch (err) {
+      console.error('Failed to save project:', err);
+      alert('Failed to save project. Check console for details.');
+    }
   }
 
   function cancelEdit() {
@@ -136,11 +148,19 @@
     errors = { title: false, shortDesc: false, appType: false };
   }
 
-  function deleteProject() {
-    const idx = projects.findIndex((p) => p.id === selectedProject.id);
-    if (idx !== -1) {
-      projects.splice(idx, 1);
-      selectedProject = projects[0] ?? null;
+  async function deleteProject() {
+    if (!confirm('Are you sure you want to delete this project?')) return;
+    
+    try {
+      await deleteProjectAPI(selectedProject.id);
+      const idx = projects.findIndex((p) => p.id === selectedProject.id);
+      if (idx !== -1) {
+        projects.splice(idx, 1);
+        selectedProject = projects[0] ?? null;
+      }
+    } catch (err) {
+      console.error('Failed to delete project:', err);
+      alert('Failed to delete project.');
     }
   }
 </script>
@@ -208,7 +228,7 @@
           <span
             style="color: #64748B; font-size: 12px; font-weight: 500; margin-top: 2px;"
           >
-            {project.appType}
+            {project.type ?? project.appType}
           </span>
         </button>
       {/each}
@@ -222,7 +242,7 @@
     class="flex-1 flex flex-col overflow-y-auto detail-scroll min-w-0"
     style="border: 1px solid #1E293B; background-color: #0F172A; border-radius: 24px;"
   >
-    {#if selectedProject}
+    {#if selectedProject || isAddingNew}
       <!-- ── Panel Header ──────────────────────────────── -->
       <div
         class="flex items-center justify-between px-8 py-5 shrink-0"
@@ -493,7 +513,7 @@
             <p
               style="color: #CBD5E1; font-size: 15px; line-height: 1.7; margin: 0;"
             >
-              {selectedProject.shortDesc}
+              {selectedProject?.desc ?? selectedProject?.shortDesc}
             </p>
           </div>
 
@@ -534,7 +554,7 @@
               style="aspect-ratio: 16/9; border-radius: 16px; border: 1px solid #334155; background: #1E293B;"
             >
               <img
-                src={selectedProject.photo}
+                src={selectedProject?.image || selectedProject?.photo || imgImageAuraAnalyticsDashboard}
                 alt={selectedProject.title}
                 style="width: 100%; height: 100%; object-fit: cover; display: block;"
               />
@@ -547,7 +567,7 @@
             <div
               style="color: #CBD5E1; font-size: 14px; line-height: 1.75; white-space: pre-wrap;"
             >
-              {selectedProject.longDesc}
+              {selectedProject?.desc ?? selectedProject?.longDesc ?? ''}
             </div>
           </div>
 
@@ -577,7 +597,7 @@
                   Application Type
                 </div>
                 <div style="color: #F8FAFC; font-size: 14px; font-weight: 700;">
-                  {selectedProject.appType}
+                  {selectedProject?.type ?? selectedProject?.appType}
                 </div>
               </div>
               <div style="flex: 1; min-width: 160px;">

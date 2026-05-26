@@ -20,9 +20,10 @@ export interface Commission {
 export interface Project {
   id: string;
   title: string;
-  appType: string;
-  shortDesc: string;
-  longDesc?: string;
+  type: string;
+  desc: string;
+  image: string;
+  imageAlt: string;
   tags: string[];
 }
 

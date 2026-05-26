@@ -10,7 +10,11 @@ const BASE =
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...init?.headers },
+    headers: {
+      'Content-Type': 'application/json',
+      'ngrok-skip-browser-warning': 'true',
+      ...init?.headers,
+    },
     ...init,
   });
   if (!res.ok) {
@@ -64,6 +68,26 @@ export function listProjects(params?: { page?: number; limit?: number }) {
   if (params?.page)  q.set('page',  String(params.page));
   if (params?.limit) q.set('limit', String(params.limit));
   return request<PaginatedResult<Project>>(`/projects?${q}`);
+}
+
+export function createProject(payload: Omit<Project, 'id'>) {
+  return request<Project>('/projects', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateProject(id: string, payload: Partial<Omit<Project, 'id'>>) {
+  return request<Project>(`/projects/${encodeURIComponent(id)}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteProjectAPI(id: string) {
+  return request<void>(`/projects/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+  });
 }
 
 // ── Interactions ───────────────────────────────────────────────────────────

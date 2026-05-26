@@ -15,7 +15,7 @@ export class ProjectEntity {
   @Column('text')
   desc!: string;
 
-  @Column()
+  @Column('text')
   image!: string;
 
   @Column()
