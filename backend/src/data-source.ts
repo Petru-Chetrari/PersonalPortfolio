@@ -6,17 +6,15 @@ import { CommissionEntity } from './entities/Commission';
 import { InteractionEntity } from './entities/Interaction';
 import { UserEntity } from './entities/User';
 
+const databaseUrl = process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_fbBUOhW72dFz@ep-empty-star-a2p01mtk.eu-central-1.aws.neon.tech/neondb?sslmode=require';
+
 export const AppDataSource = new DataSource({
   type: 'postgres',
-  host: 'ep-empty-star-a2p01mtk.eu-central-1.aws.neon.tech',
-  database: 'neondb',
-  driver: require('mssql/msnodesqlv8'),
-  synchronize: false,
+  url: databaseUrl,
+  ssl: { rejectUnauthorized: false }, // Required for secure connections to Neon/Supabase
+  synchronize: true, // Automatically creates database tables matching entities
   logging: false,
   entities: [ProjectEntity, TagEntity, CommissionEntity, InteractionEntity, UserEntity],
-  migrations: [__dirname + '/migrations/*.ts'],
+  migrations: [],
   subscribers: [],
-  extra: {
-    connectionString: 'postgresql://neondb_owner:npg_fbBUOhW72dFz@ep-empty-star-a2p01mtk.eu-central-1.aws.neon.tech/neondb?sslmode=require'
-  }
 } as any);
