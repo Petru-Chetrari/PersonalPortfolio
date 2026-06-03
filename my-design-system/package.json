@@ -19,6 +19,7 @@
   "dependencies": {
     "@astrojs/node": "^10.1.2",
     "@astrojs/svelte": "^8.0.4",
+    "@astrojs/vercel": "^10.0.8",
     "@chenglou/pretext": "github:chenglou/pretext",
     "@tailwindcss/vite": "^4.2.2",
     "astro": "^6.1.3",
