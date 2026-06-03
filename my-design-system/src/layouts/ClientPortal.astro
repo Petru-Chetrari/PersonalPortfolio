@@ -85,6 +85,12 @@ const { title = 'Client Portal', description = 'Manage your commissions.' } = As
   </div>
 
   <script>
+    import { setupInactivityTimer } from '../lib/auth-utils';
+    // Start inactivity timer for 15 minutes
+    setupInactivityTimer(900000);
+  </script>
+
+  <script>
     // Highlight active nav link
     const links = document.querySelectorAll<HTMLAnchorElement>('.client-nav-link');
     links.forEach(link => {

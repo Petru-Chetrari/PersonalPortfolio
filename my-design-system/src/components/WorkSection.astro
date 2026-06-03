@@ -30,7 +30,8 @@
     if (!grid) return;
 
     try {
-      const res = await fetch('http://localhost:3001/projects?limit=6');
+      const API = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.PUBLIC_API_URL) || 'http://localhost:3001';
+      const res = await fetch(`${API}/projects?limit=6`);
       if (!res.ok) throw new Error(`${res.status}`);
       const { data } = await res.json();
 

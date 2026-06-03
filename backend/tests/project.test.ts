@@ -2,8 +2,12 @@ import request from 'supertest';
 import app from '../src/app';
 import { setupTestDB, closeTestDB } from './setupTestDB';
 
+let adminToken = '';
+
 beforeEach(async () => {
   await setupTestDB();
+  const login = await request(app).post('/api/auth/login').send({ username: 'admin', password: 'testpass' });
+  adminToken = login.body.accessToken;
 });
 
 afterAll(async () => {
@@ -54,6 +58,7 @@ describe('POST /projects', () => {
   it('creates a project with a UUID id and returns 201', async () => {
     const res = await request(app)
       .post('/projects')
+      .set('Authorization', `Bearer ${adminToken}`)
       .send({ title: 'New Project', type: 'SaaS', desc: 'Description here', imageAlt: 'New project alt' });
     expect(res.status).toBe(201);
     expect(res.body.id).toMatch(
@@ -65,6 +70,7 @@ describe('POST /projects', () => {
   it('returns 400 when required field is missing', async () => {
     const res = await request(app)
       .post('/projects')
+      .set('Authorization', `Bearer ${adminToken}`)
       .send({ title: 'No Desc' }); // missing type, desc, imageAlt
     expect(res.status).toBe(400);
     expect(res.body.error).toBe('Validation failed');
@@ -76,6 +82,7 @@ describe('PUT /projects/:id', () => {
     const id = await getFirstProjectId();
     const res = await request(app)
       .put(`/projects/${id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
       .send({ title: 'Renamed Project' });
     expect(res.status).toBe(200);
     expect(res.body.title).toBe('Renamed Project');
@@ -85,6 +92,7 @@ describe('PUT /projects/:id', () => {
   it('returns 404 when project does not exist', async () => {
     const res = await request(app)
       .put('/projects/00000000-0000-0000-0000-000000000000')
+      .set('Authorization', `Bearer ${adminToken}`)
       .send({ title: 'Ghost' });
     expect(res.status).toBe(404);
   });
@@ -94,7 +102,9 @@ describe('DELETE /projects/:id', () => {
   it('deletes project (204) then 404 on retry', async () => {
     const id = await getFirstProjectId();
 
-    const del = await request(app).delete(`/projects/${id}`);
+    const del = await request(app)
+      .delete(`/projects/${id}`)
+      .set('Authorization', `Bearer ${adminToken}`);
     expect(del.status).toBe(204);
 
     const retry = await request(app).get(`/projects/${id}`);
@@ -102,7 +112,9 @@ describe('DELETE /projects/:id', () => {
   });
 
   it('returns 404 for unknown id', async () => {
-    const res = await request(app).delete('/projects/00000000-0000-0000-0000-000000000000');
+    const res = await request(app)
+      .delete('/projects/00000000-0000-0000-0000-000000000000')
+      .set('Authorization', `Bearer ${adminToken}`);
     expect(res.status).toBe(404);
   });
 });

@@ -4,6 +4,7 @@ import { ProjectEntity } from './entities/Project';
 import { TagEntity } from './entities/Tag';
 import { CommissionEntity } from './entities/Commission';
 import { InteractionEntity } from './entities/Interaction';
+import { UserEntity } from './entities/User';
 
 export const AppDataSource = new DataSource({
   type: 'mssql',
@@ -12,7 +13,7 @@ export const AppDataSource = new DataSource({
   driver: require('mssql/msnodesqlv8'),
   synchronize: false,
   logging: false,
-  entities: [ProjectEntity, TagEntity, CommissionEntity, InteractionEntity],
+  entities: [ProjectEntity, TagEntity, CommissionEntity, InteractionEntity, UserEntity],
   migrations: [__dirname + '/migrations/*.ts'],
   subscribers: [],
   extra: {

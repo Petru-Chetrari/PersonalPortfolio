@@ -3,16 +3,19 @@
 // Base URL: PUBLIC_API_URL env var (defaults to http://localhost:3001).
 
 import type { Commission, Project, Interaction, PaginatedResult, AdminStats, Status } from './types';
+import { getAccessTokenFromCookie } from './auth-utils';
 
 const BASE =
-  (typeof import.meta !== 'undefined' && (import.meta as any).env?.PUBLIC_API_URL) ??
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.PUBLIC_API_URL) ||
   'http://localhost:3001';
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const token = getAccessTokenFromCookie();
   const res = await fetch(`${BASE}${path}`, {
     headers: {
       'Content-Type': 'application/json',
       'ngrok-skip-browser-warning': 'true',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
       ...init?.headers,
     },
     ...init,

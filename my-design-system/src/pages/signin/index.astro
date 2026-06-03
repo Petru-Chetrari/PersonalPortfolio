@@ -3,17 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 ---
 
 <Layout>
-  <div class="min-h-screen flex items-center justify-center bg-slate-950 px-4 py-12">
     <div class="w-full max-w-[440px]">
-
-      <!-- Brand -->
-      <div class="flex items-center justify-center gap-2 mb-8">
-        <svg width="17" height="20" viewBox="0 0 17 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M8.5 0L17 5.25V15.75L8.5 21L0 15.75V5.25L8.5 0Z" fill="#3B82F6"/>
-        </svg>
-        <span class="text-slate-50 font-bold text-xl tracking-tight font-['Segoe_UI',sans-serif]">Antigravity</span>
-      </div>
-
       <!-- Card -->
       <div
         class="rounded-2xl border border-slate-700 p-8 shadow-2xl"
@@ -89,46 +79,85 @@ import Layout from '../../layouts/Layout.astro';
         </div>
       </div>
 
-      <!-- Footer note -->
-      <p class="text-center text-xs text-slate-600 mt-6 font-['Segoe_UI_Emoji',sans-serif]">
-        © 2026 Antigravity. All rights reserved.
-      </p>
-    </div>
   </div>
 
   <script>
-    const form = document.getElementById('signin-form') as HTMLFormElement;
-    const usernameInput = document.getElementById('username') as HTMLInputElement;
-    const passwordInput = document.getElementById('password') as HTMLInputElement;
-    const usernameError = document.getElementById('username-error') as HTMLElement;
-    const passwordError = document.getElementById('password-error') as HTMLElement;
+    document.addEventListener('astro:page-load', () => {
+      const form = document.getElementById('signin-form') as HTMLFormElement;
+      if (!form) return; // Only run on pages with this form
 
-    form?.addEventListener('submit', (e) => {
-      e.preventDefault();
-      let valid = true;
+      const usernameInput = document.getElementById('username') as HTMLInputElement;
+      const passwordInput = document.getElementById('password') as HTMLInputElement;
+      const usernameError = document.getElementById('username-error') as HTMLElement;
+      const passwordError = document.getElementById('password-error') as HTMLElement;
 
-      if (!usernameInput.value.trim()) {
-        usernameError.classList.remove('hidden');
-        usernameInput.style.borderColor = '#EF4444';
-        valid = false;
-      } else {
-        usernameError.classList.add('hidden');
-        usernameInput.style.borderColor = '#334155';
-      }
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        let valid = true;
 
-      if (!passwordInput.value.trim()) {
-        passwordError.classList.remove('hidden');
-        passwordInput.style.borderColor = '#EF4444';
-        valid = false;
-      } else {
-        passwordError.classList.add('hidden');
-        passwordInput.style.borderColor = '#334155';
-      }
+        if (!usernameInput.value.trim()) {
+          usernameError.classList.remove('hidden');
+          usernameInput.style.borderColor = '#EF4444';
+          valid = false;
+        } else {
+          usernameError.classList.add('hidden');
+          usernameInput.style.borderColor = '#334155';
+        }
 
-      if (valid) {
-        // TODO: hook up real auth — redirect to admin for demo
-        window.location.href = '/admin';
-      }
+        if (!passwordInput.value.trim()) {
+          passwordError.classList.remove('hidden');
+          passwordInput.style.borderColor = '#EF4444';
+          valid = false;
+        } else {
+          passwordError.classList.add('hidden');
+          passwordInput.style.borderColor = '#334155';
+        }
+
+        if (valid) {
+          const username = usernameInput.value.trim();
+          const password = passwordInput.value;
+
+          const apiBase = import.meta.env.PUBLIC_API_URL || 'http://localhost:3001';
+          fetch(`${apiBase}/api/auth/login`, {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'ngrok-skip-browser-warning': 'true'
+            },
+            body: JSON.stringify({ username, password })
+          })
+          .then(async (res) => {
+            const data = await res.json();
+            if (res.ok) {
+              document.cookie = `access_token=${data.accessToken}; path=/; max-age=900; SameSite=Lax`;
+              document.cookie = `refresh_token=${data.refreshToken}; path=/; max-age=604800; SameSite=Lax`;
+
+              // Extract role from the JWT payload since the API response may not include it
+              let role = data.role;
+              if (!role && data.accessToken) {
+                try {
+                  const base64Url = data.accessToken.split('.')[1];
+                  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                  const payload = JSON.parse(decodeURIComponent(atob(base64).split('').map(c =>
+                    '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+                  ).join('')));
+                  role = payload.role;
+                  console.log('[signin] JWT payload:', payload);
+                } catch (e) {
+                  console.error('[signin] Failed to decode JWT:', e);
+                }
+              }
+
+              window.location.href = role === 'admin' ? '/admin' : '/client/commissions';
+            } else {
+              alert(data.error || 'Invalid credentials');
+            }
+          })
+          .catch(() => {
+            alert('Failed to sign in. Please try again later.');
+          });
+        }
+      });
     });
   </script>
 </Layout>

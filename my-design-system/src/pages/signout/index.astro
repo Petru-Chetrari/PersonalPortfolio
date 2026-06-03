@@ -3,16 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 ---
 
 <Layout>
-  <div class="min-h-screen flex items-center justify-center bg-slate-950 px-4 py-12">
     <div class="w-full max-w-[440px]">
-
-      <!-- Brand -->
-      <div class="flex items-center justify-center gap-2 mb-8">
-        <svg width="17" height="20" viewBox="0 0 17 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M8.5 0L17 5.25V15.75L8.5 21L0 15.75V5.25L8.5 0Z" fill="#3B82F6"/>
-        </svg>
-        <span class="text-slate-50 font-bold text-xl tracking-tight font-['Segoe_UI',sans-serif]">Antigravity</span>
-      </div>
 
       <!-- Card -->
       <div
@@ -49,16 +40,26 @@ import Layout from '../../layouts/Layout.astro';
           </a>
         </div>
       </div>
-
-      <p class="text-center text-xs text-slate-600 mt-6 font-['Segoe_UI_Emoji',sans-serif]">
-        © 2026 Antigravity. All rights reserved.
-      </p>
     </div>
-  </div>
 
   <script>
     document.getElementById('signout-confirm')?.addEventListener('click', () => {
-      window.location.href = '/signin';
+      const apiUrl = 'http://localhost:3001';
+      // Attempt backend logout (ignoring errors as we want to clear cookies anyway)
+      const tokenMatch = document.cookie.match(/(^| )access_token=([^;]+)/);
+      const token = tokenMatch ? tokenMatch[2] : null;
+
+      fetch(`${apiUrl}/api/auth/logout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        }
+      }).finally(() => {
+        document.cookie = 'access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        document.cookie = 'refresh_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        window.location.href = '/signin';
+      });
     });
   </script>
 </Layout>

@@ -52,7 +52,7 @@ import AdminDashboard from '../../../layouts/AdminDashboard.astro';
   </div>
 
   <script>
-    const API = 'http://localhost:3001';
+    const API = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.PUBLIC_API_URL) || 'http://localhost:3001';
 
     const statusConfig = {
       pending:   { label: 'Pending',   color: '#FFB900', bg: 'rgba(255,185,0,0.1)',   dot: '#FFB900' },

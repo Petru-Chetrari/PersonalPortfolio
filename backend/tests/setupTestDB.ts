@@ -3,7 +3,9 @@ import { ProjectEntity } from '../src/entities/Project';
 import { CommissionEntity } from '../src/entities/Commission';
 import { InteractionEntity } from '../src/entities/Interaction';
 import { TagEntity } from '../src/entities/Tag';
+import { UserEntity } from '../src/entities/User';
 import { v4 as uuidv4 } from 'uuid';
+import bcrypt from 'bcrypt';
 
 export async function setupTestDB() {
   if (!AppDataSource.isInitialized) {
@@ -16,6 +18,15 @@ export async function setupTestDB() {
   await AppDataSource.query(`DELETE FROM interactions`);
   await AppDataSource.query(`DELETE FROM projects`);
   await AppDataSource.query(`DELETE FROM tags`);
+  await AppDataSource.query(`DELETE FROM users`);
+
+  // Seed Users
+  const userRepo = AppDataSource.getRepository(UserEntity);
+  const passwordHash = await bcrypt.hash('testpass', 10);
+  await userRepo.save([
+    { id: uuidv4(), username: 'admin', email: 'admin@test.com', passwordHash, role: 'admin' },
+    { id: uuidv4(), username: 'client_a', email: 'client@test.com', passwordHash, role: 'client' }
+  ]);
 
   // Seed Projects
   const projectRepo = AppDataSource.getRepository(ProjectEntity);

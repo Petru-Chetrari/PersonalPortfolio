@@ -7,7 +7,7 @@ AppDataSource.initialize()
   .then(() => {
     console.log('Data Source has been initialized!');
     app.listen(PORT, '0.0.0.0', () => {
-      console.log(`Portfolio backend running on http://0.0.0.0:${PORT}`);
+      console.log(`Portfolio backend running on http://localhost:${PORT}`);
       console.log('Endpoints: /commissions  /projects  /interactions  /health');
     });
   })

@@ -3,7 +3,9 @@ import { ProjectEntity } from './src/entities/Project';
 import { TagEntity } from './src/entities/Tag';
 import { CommissionEntity } from './src/entities/Commission';
 import { InteractionEntity } from './src/entities/Interaction';
+import { UserEntity } from './src/entities/User';
 import { v4 as uuidv4 } from 'uuid';
+import bcrypt from 'bcrypt';
 
 const SEED_COMMISSIONS = [
   { id: 'COM-001', client: 'Alex M.', title: 'Portfolio Website Redesign', appType: 'Web App', status: 'active', date: '2026-03-20', dueDate: '2026-04-15', note: 'Wire-frames sent, awaiting feedback on hero section.' },
@@ -36,6 +38,36 @@ async function seed() {
   try {
     await AppDataSource.initialize();
     console.log("Data Source initialized for seeding...");
+
+    // Seed Admin User
+    const userRepo = AppDataSource.getRepository(UserEntity);
+    const adminExists = await userRepo.findOneBy({ username: 'admin' });
+    if (!adminExists) {
+      const passwordHash = await bcrypt.hash('admin', 12);
+      const admin = userRepo.create({
+        id: uuidv4(),
+        username: 'admin',
+        email: 'admin@example.com',
+        passwordHash,
+        role: 'admin'
+      });
+      await userRepo.save(admin);
+      console.log("Seeded Admin user (admin/admin)");
+    }
+
+    const clientExists = await userRepo.findOneBy({ username: 'e2e_client' });
+    if (!clientExists) {
+      const passwordHash = await bcrypt.hash('password', 12);
+      const client = userRepo.create({
+        id: uuidv4(),
+        username: 'e2e_client',
+        email: 'e2e@example.com',
+        passwordHash,
+        role: 'client'
+      });
+      await userRepo.save(client);
+      console.log("Seeded E2E Client user (e2e_client/password)");
+    }
 
     // Seed Commissions
     const commissionRepo = AppDataSource.getRepository(CommissionEntity);

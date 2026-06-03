@@ -1,5 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
+import authRoutes from './routes/auth.routes';
 import commissionRoutes from './routes/commission.routes';
 import projectRoutes from './routes/project.routes';
 import interactionRoutes from './routes/interaction.routes';
@@ -11,6 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 // ── Routes ────────────────────────────────────────────────────────────────────
+app.use('/api/auth', authRoutes);
 app.use('/commissions', commissionRoutes);
 app.use('/projects', projectRoutes);
 app.use('/interactions', interactionRoutes);

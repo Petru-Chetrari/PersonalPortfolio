@@ -17,6 +17,7 @@
     "test:e2e:ui": "npx playwright test --ui"
   },
   "dependencies": {
+    "@astrojs/node": "^10.1.2",
     "@astrojs/svelte": "^8.0.4",
     "@chenglou/pretext": "github:chenglou/pretext",
     "@tailwindcss/vite": "^4.2.2",

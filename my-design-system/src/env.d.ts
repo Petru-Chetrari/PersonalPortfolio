@@ -13,5 +13,6 @@ interface UserPrefs {
 declare namespace App {
     interface Locals {
         prefs: UserPrefs;
+        user?: { id: string; role: 'admin' | 'client'; username: string };
     }
 }

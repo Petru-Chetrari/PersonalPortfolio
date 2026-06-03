@@ -28,7 +28,7 @@ export async function loginAsAdmin(page: Page) {
   await expect(page.locator('#signin-form')).toBeVisible();
 
   await page.fill('#username', 'admin');
-  await page.fill('#password', 'admin123');
+  await page.fill('#password', 'password');
 
   console.log('[STEP] loginAsAdmin → submitting credentials');
   await Promise.all([
@@ -47,16 +47,14 @@ export async function loginAsClient(page: Page) {
   await page.goto('/signin');
   await expect(page.locator('#signin-form')).toBeVisible();
 
-  await page.fill('#username', 'client_a');
-  await page.fill('#password', 'client123');
+  await page.fill('#username', 'e2e_client');
+  await page.fill('#password', 'password');
 
   console.log('[STEP] loginAsClient → submitting credentials');
   await Promise.all([
-    page.waitForURL('**/admin', { timeout: 10_000 }),
+    page.waitForURL('**/client/commissions', { timeout: 10_000 }),
     page.click('#signin-btn'),
   ]);
-  // Navigate to the client section
-  await page.goto('/client/commissions');
   console.log('[STEP] loginAsClient → reached /client/commissions ✓');
 }
 

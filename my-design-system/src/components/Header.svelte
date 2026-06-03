@@ -3,12 +3,15 @@
 
     let isMobileMenuOpen = $state(false);
     let isScrolled = $state(false);
+    let user = $state(null);
+    let role = $state(null);
 
     import { onMount } from "svelte";
     import imgLogo from "../assets/logo.svg";
     import imgText from "../assets/brand-text.svg";
     import PreferenceCenter from "./PreferenceCenter.svelte";
     import { incrementInteraction } from "../lib/api";
+    import { getAccessTokenFromCookie, decodeJwt } from "../lib/auth-utils";
 
     function handleMar9() {
         // fire-and-forget — no UI feedback needed
@@ -16,6 +19,14 @@
     }
 
     onMount(() => {
+        const token = getAccessTokenFromCookie();
+        if (token) {
+            user = decodeJwt(token);
+            role = user.role;
+        }
+        role === 'admin' ? showAdmin = true : showAdmin = false;
+        role === 'client' ? showClient = true : showClient = false;
+
         const handleScroll = () => {
             isScrolled = window.scrollY > 20;
         };
@@ -134,14 +145,30 @@
             </a>
         {/if}
 
-        <button
-            onclick={handleMar9}
-            class="px-3 py-1 bg-blue-500/20 border border-blue-500/50 rounded-md text-blue-400 hover:bg-blue-500 hover:text-white transition-all text-xs font-semibold"
-        >
-            +1 Click Mar 9
-        </button>
+        {#if role}
+        <div class="bg-slate-700 w-px h-[16px] shrink-0"></div>
+        {/if}
 
-        <PreferenceCenter />
+        {#if user}
+            <div class="flex items-center gap-[12px]">
+                <span class="text-xs text-slate-400 font-['Segoe_UI',sans-serif]">
+                    Hi, <span class="text-slate-200 font-semibold">{user.username}</span>
+                </span>
+                <a
+                    href="/signout"
+                    class="px-3 py-1 bg-slate-800 border border-slate-700 rounded-md text-slate-300 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/50 transition-all text-xs font-semibold"
+                >
+                    Sign out
+                </a>
+            </div>
+        {:else}
+            <a
+                href="/signin"
+                class="px-3 py-1 bg-blue-600 rounded-md text-white hover:bg-blue-500 transition-all text-xs font-semibold"
+            >
+                Sign in
+            </a>
+        {/if}
     </nav>
 
     <!-- Mobile Dropdown -->
@@ -174,16 +201,28 @@
                     >Admin</a
                 >
             {/if}
-            <button
-                onclick={handleMar9}
-                class="w-full px-4 py-3 bg-blue-500/20 border border-blue-500/50 rounded-lg text-blue-400 hover:bg-blue-500 hover:text-white transition-all text-sm font-semibold"
-            >
-                +1 Click Mar 9
-            </button>
 
-            <div class="w-full flex justify-center pb-2">
-                <PreferenceCenter />
-            </div>
+            <div class="bg-slate-700 h-px w-full shrink-0"></div>
+            {#if user}
+                <div class="flex flex-col gap-2 bg-slate-800/40 p-3 rounded-lg border border-slate-800">
+                    <span class="text-xs text-slate-400">
+                        Signed in as <span class="text-slate-200 font-semibold">{user.username}</span>
+                    </span>
+                    <a
+                        href="/signout"
+                        class="w-full text-center px-4 py-2.5 bg-red-950/40 border border-red-900/60 rounded-lg text-red-400 hover:bg-red-900 hover:text-white transition-all text-sm font-semibold"
+                    >
+                        Sign out
+                    </a>
+                </div>
+            {:else}
+                <a
+                    href="/signin"
+                    class="w-full text-center px-4 py-2.5 bg-blue-600 rounded-lg text-white hover:bg-blue-500 transition-all text-sm font-semibold"
+                >
+                    Sign in
+                </a>
+            {/if}
         </div>
     {/if}
 </header>

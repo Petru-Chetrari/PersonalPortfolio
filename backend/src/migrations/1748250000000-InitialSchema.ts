@@ -11,7 +11,7 @@ export class InitialSchema1748250000000 implements MigrationInterface {
                 "title"      nvarchar(255) NOT NULL,
                 "type"       nvarchar(255) NOT NULL,
                 "desc"       ntext         NOT NULL,
-                "image"      nvarchar(255) NOT NULL,
+                "image"      nvarchar(max) NOT NULL,
                 "imageAlt"   nvarchar(255) NOT NULL,
                 "updated_at" datetime      NOT NULL
                     CONSTRAINT "DF_projects_updated_at" DEFAULT CURRENT_TIMESTAMP,
@@ -19,7 +19,7 @@ export class InitialSchema1748250000000 implements MigrationInterface {
             )
         `);
 
-        // ─── tags (normalised from Project.tags[] → 3NF) ────────────
+        // ─── tags ────────────
         await queryRunner.query(`
             CREATE TABLE "tags" (
                 "id"   int           NOT NULL IDENTITY(1,1),
@@ -29,7 +29,7 @@ export class InitialSchema1748250000000 implements MigrationInterface {
             )
         `);
 
-        // ─── project_tags  (M:N junction) ────────────────────────────
+        // ─── project_tags   ────────────────────────────
         await queryRunner.query(`
             CREATE TABLE "project_tags" (
                 "projectsId" nvarchar(255) NOT NULL,
