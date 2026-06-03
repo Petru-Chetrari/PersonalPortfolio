@@ -7,9 +7,9 @@ import { InteractionEntity } from './entities/Interaction';
 import { UserEntity } from './entities/User';
 
 export const AppDataSource = new DataSource({
-  type: 'mssql',
-  host: 'DESKTOP-31NFAM7',
-  database: 'PortfolioDB',
+  type: 'postgres',
+  host: 'ep-empty-star-a2p01mtk.eu-central-1.aws.neon.tech',
+  database: 'neondb',
   driver: require('mssql/msnodesqlv8'),
   synchronize: false,
   logging: false,
@@ -17,6 +17,6 @@ export const AppDataSource = new DataSource({
   migrations: [__dirname + '/migrations/*.ts'],
   subscribers: [],
   extra: {
-    connectionString: 'Server=DESKTOP-31NFAM7;Database=PortfolioDB;Trusted_Connection=yes;Driver={ODBC Driver 17 for SQL Server};'
+    connectionString: 'postgresql://neondb_owner:npg_fbBUOhW72dFz@ep-empty-star-a2p01mtk.eu-central-1.aws.neon.tech/neondb?sslmode=require'
   }
 } as any);
