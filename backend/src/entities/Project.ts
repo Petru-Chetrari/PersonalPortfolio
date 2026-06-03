@@ -1,4 +1,4 @@
-import { Entity, PrimaryColumn, Column, ManyToMany, JoinTable } from 'typeorm';
+import { Entity, PrimaryColumn, Column, ManyToMany, JoinTable, UpdateDateColumn } from 'typeorm';
 import { TagEntity } from './Tag';
 
 @Entity('projects')
@@ -26,6 +26,6 @@ export class ProjectEntity {
   tags!: TagEntity[];
 
   // Trigger will update this
-  @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
+  @UpdateDateColumn()
   updated_at!: Date;
 }

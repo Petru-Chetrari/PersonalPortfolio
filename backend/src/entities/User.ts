@@ -1,4 +1,4 @@
-import { Entity, PrimaryColumn, Column } from 'typeorm';
+import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity('users')
 export class UserEntity {
@@ -17,9 +17,9 @@ export class UserEntity {
   @Column({ length: 20, default: 'client' })
   role!: 'admin' | 'client';
 
-  @Column({ name: 'created_at', type: 'datetime', default: () => 'GETDATE()' })
+  @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
-  @Column({ name: 'updated_at', type: 'datetime', default: () => 'GETDATE()' })
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt!: Date;
 }

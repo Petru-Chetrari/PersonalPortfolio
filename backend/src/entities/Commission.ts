@@ -1,4 +1,4 @@
-import { Entity, PrimaryColumn, Column } from 'typeorm';
+import { Entity, PrimaryColumn, Column, UpdateDateColumn } from 'typeorm';
 
 @Entity('commissions')
 export class CommissionEntity {
@@ -36,6 +36,6 @@ export class CommissionEntity {
   longDesc?: string;
 
   // Trigger will update this
-  @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
+  @UpdateDateColumn()
   updated_at!: Date;
 }
