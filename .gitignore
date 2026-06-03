@@ -26,3 +26,5 @@ my-design-system/npm-debug.log*
 # Added by code-review-graph
 .code-review-graph/
 references
+
+package-lock.json
