@@ -28,3 +28,6 @@ my-design-system/npm-debug.log*
 references
 
 package-lock.json
+my-design-system/e2e/
+my-design-system/playwright-report/
+my-design-system/test-results

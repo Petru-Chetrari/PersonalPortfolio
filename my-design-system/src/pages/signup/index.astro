@@ -1,0 +1,180 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout>
+    <div class="w-full max-w-[440px]">
+
+
+
+      <!-- Card -->
+      <div
+        class="rounded-2xl border border-slate-700 p-8 shadow-2xl"
+        style="background-color: rgba(30, 41, 59, 0.85); backdrop-filter: blur(12px);"
+      >
+        <div class="mb-6">
+          <h1 class="text-2xl font-bold text-slate-50 font-['Segoe_UI',sans-serif] tracking-tight">Create an account</h1>
+          <p class="text-slate-400 text-sm mt-1 font-['Segoe_UI_Emoji',sans-serif]">
+            Sign up to start commissioning projects.
+          </p>
+        </div>
+
+        <form id="signup-form" class="flex flex-col gap-4" novalidate>
+          <!-- Username -->
+          <div class="flex flex-col gap-1.5">
+            <label for="username" class="text-sm font-medium text-slate-300 font-['Segoe_UI',sans-serif]">
+              Username
+            </label>
+            <input
+              id="username"
+              name="username"
+              type="text"
+              autocomplete="username"
+              placeholder="your_username"
+              class="w-full rounded-xl px-4 py-3 text-sm text-slate-50 placeholder-slate-600 outline-none transition-all font-['Segoe_UI_Emoji',sans-serif]"
+              style="background-color: #0F172A; border: 1px solid #334155;"
+              onfocus="this.style.borderColor='#3B82F6'"
+              onblur="this.style.borderColor='#334155'"
+            />
+            <p id="username-error" class="text-xs text-red-400 hidden font-['Segoe_UI_Emoji',sans-serif]">Username is required (min 3 chars).</p>
+          </div>
+
+          <!-- Email -->
+          <div class="flex flex-col gap-1.5">
+            <label for="email" class="text-sm font-medium text-slate-300 font-['Segoe_UI',sans-serif]">
+              Email
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              placeholder="you@example.com"
+              class="w-full rounded-xl px-4 py-3 text-sm text-slate-50 placeholder-slate-600 outline-none transition-all font-['Segoe_UI_Emoji',sans-serif]"
+              style="background-color: #0F172A; border: 1px solid #334155;"
+              onfocus="this.style.borderColor='#3B82F6'"
+              onblur="this.style.borderColor='#334155'"
+            />
+            <p id="email-error" class="text-xs text-red-400 hidden font-['Segoe_UI_Emoji',sans-serif]">Valid email is required.</p>
+          </div>
+
+          <!-- Password -->
+          <div class="flex flex-col gap-1.5">
+            <label for="password" class="text-sm font-medium text-slate-300 font-['Segoe_UI',sans-serif]">
+              Password
+            </label>
+            <div class="relative">
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autocomplete="new-password"
+                placeholder="••••••••"
+                class="w-full rounded-xl px-4 py-3 text-sm text-slate-50 placeholder-slate-600 outline-none transition-all font-['Segoe_UI_Emoji',sans-serif]"
+                style="background-color: #0F172A; border: 1px solid #334155;"
+                onfocus="this.style.borderColor='#3B82F6'"
+                onblur="this.style.borderColor='#334155'"
+              />
+            </div>
+            <p id="password-error" class="text-xs text-red-400 hidden font-['Segoe_UI_Emoji',sans-serif]">Password is required (min 4 chars).</p>
+          </div>
+
+          <!-- Submit -->
+          <button
+            id="signup-btn"
+            type="submit"
+            class="w-full mt-2 rounded-xl py-3 px-6 flex items-center justify-center gap-2 font-semibold text-sm text-white transition-all duration-200 hover:opacity-90 active:scale-[0.98] font-['Segoe_UI',sans-serif]"
+            style="background-color: #3B82F6;"
+          >
+            Sign up
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M3 8h10M9 4l4 4-4 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </form>
+
+        <div class="mt-6 pt-6 border-t border-slate-700 text-center">
+          <p class="text-sm text-slate-500 font-['Segoe_UI_Emoji',sans-serif]">
+            Already have an account?
+            <a href="/signin" class="text-blue-400 hover:text-blue-300 transition-colors ml-1">Sign in</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+  <script>
+    document.addEventListener('astro:page-load', () => {
+      const form = document.getElementById('signup-form') as HTMLFormElement;
+      if (!form) return;
+
+      const usernameInput = document.getElementById('username') as HTMLInputElement;
+      const emailInput = document.getElementById('email') as HTMLInputElement;
+      const passwordInput = document.getElementById('password') as HTMLInputElement;
+      
+      const usernameError = document.getElementById('username-error') as HTMLElement;
+      const emailError = document.getElementById('email-error') as HTMLElement;
+      const passwordError = document.getElementById('password-error') as HTMLElement;
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        let valid = true;
+
+        if (!usernameInput.value.trim() || usernameInput.value.length < 3) {
+          usernameError.classList.remove('hidden');
+          usernameInput.style.borderColor = '#EF4444';
+          valid = false;
+        } else {
+          usernameError.classList.add('hidden');
+          usernameInput.style.borderColor = '#334155';
+        }
+
+        if (!emailInput.value.trim() || !emailInput.value.includes('@')) {
+          emailError.classList.remove('hidden');
+          emailInput.style.borderColor = '#EF4444';
+          valid = false;
+        } else {
+          emailError.classList.add('hidden');
+          emailInput.style.borderColor = '#334155';
+        }
+
+        if (!passwordInput.value.trim() || passwordInput.value.length < 4) {
+          passwordError.classList.remove('hidden');
+          passwordInput.style.borderColor = '#EF4444';
+          valid = false;
+        } else {
+          passwordError.classList.add('hidden');
+          passwordInput.style.borderColor = '#334155';
+        }
+
+        if (valid) {
+          const username = usernameInput.value.trim();
+          const email = emailInput.value.trim();
+          const password = passwordInput.value;
+
+          const apiBase = 'http://localhost:3001';
+          fetch(`${apiBase}/api/auth/register`, {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'ngrok-skip-browser-warning': 'true'
+            },
+            body: JSON.stringify({ username, email, password })
+          })
+          .then(async (res) => {
+            const data = await res.json();
+            if (res.ok) {
+              document.cookie = `access_token=${data.accessToken}; path=/; max-age=900; SameSite=Lax`;
+              document.cookie = `refresh_token=${data.refreshToken}; path=/; max-age=604800; SameSite=Lax`;
+              window.location.href = data.role === 'admin' ? '/admin' : '/client/commissions';
+            } else {
+              alert(data.error || 'Registration failed');
+            }
+          })
+          .catch(() => {
+            alert('Failed to register. Please try again later.');
+          });
+        }
+      });
+    });
+  </script>
+</Layout>
